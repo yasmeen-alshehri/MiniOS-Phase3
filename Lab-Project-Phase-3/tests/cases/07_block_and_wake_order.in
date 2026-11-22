@@ -1,0 +1,10 @@
+# Removing the middle task keeps FIFO order; wake appends at the tail.
+task create A 2 10
+task create B 2 20
+task create C 2 30
+block 2
+tasks
+memory
+wake 2
+tasks
+check

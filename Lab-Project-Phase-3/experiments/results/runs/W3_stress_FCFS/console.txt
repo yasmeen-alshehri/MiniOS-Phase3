@@ -1,0 +1,97 @@
+MiniOS for a Study Room | C11 Phase 2 prototype
+One simulated CPU | quantum=2 | payload budget=65536 bytes
+Type help for commands. Notes persist; task state starts fresh on restart.
+minios> quantum 1000000
+OK: quantum 1000000
+minios> task create T1 13 2048
+Created P1 T1: READY, burst=13, payload=2048 bytes
+minios> task create T2 5 256
+Created P2 T2: READY, burst=5, payload=256 bytes
+minios> task create T3 32 3072
+Created P3 T3: READY, burst=32, payload=3072 bytes
+minios> task create T4 23 1024
+Created P4 T4: READY, burst=23, payload=1024 bytes
+minios> task create T5 8 3072
+Created P5 T5: READY, burst=8, payload=3072 bytes
+minios> task create T6 15 3072
+Created P6 T6: READY, burst=15, payload=3072 bytes
+minios> task create T7 13 2048
+Created P7 T7: READY, burst=13, payload=2048 bytes
+minios> task create T8 10 1024
+Created P8 T8: READY, burst=10, payload=1024 bytes
+minios> task create T9 1 256
+Created P9 T9: READY, burst=1, payload=256 bytes
+minios> task create T10 7 256
+Created P10 T10: READY, burst=7, payload=256 bytes
+minios> task create T11 9 2048
+Created P11 T11: READY, burst=9, payload=2048 bytes
+minios> task create T12 1 3072
+Created P12 T12: READY, burst=1, payload=3072 bytes
+minios> task create T13 36 3072
+Created P13 T13: READY, burst=36, payload=3072 bytes
+minios> task create T14 7 512
+Created P14 T14: READY, burst=7, payload=512 bytes
+minios> task create T15 8 3072
+Created P15 T15: READY, burst=8, payload=3072 bytes
+minios> task create T16 17 512
+Created P16 T16: READY, burst=17, payload=512 bytes
+minios> task create T17 30 2048
+Created P17 T17: READY, burst=30, payload=2048 bytes
+minios> task create T18 37 256
+Created P18 T18: READY, burst=37, payload=256 bytes
+minios> task create T19 19 256
+Created P19 T19: READY, burst=19, payload=256 bytes
+minios> task create T20 22 3072
+Created P20 T20: READY, burst=22, payload=3072 bytes
+minios> run
+[0,13) P1 T1           RUNNING -> FINISHED remaining=0
+[13,18) P2 T2           RUNNING -> FINISHED remaining=0
+[18,50) P3 T3           RUNNING -> FINISHED remaining=0
+[50,73) P4 T4           RUNNING -> FINISHED remaining=0
+[73,81) P5 T5           RUNNING -> FINISHED remaining=0
+[81,96) P6 T6           RUNNING -> FINISHED remaining=0
+[96,109) P7 T7           RUNNING -> FINISHED remaining=0
+[109,119) P8 T8           RUNNING -> FINISHED remaining=0
+[119,120) P9 T9           RUNNING -> FINISHED remaining=0
+[120,127) P10 T10          RUNNING -> FINISHED remaining=0
+[127,136) P11 T11          RUNNING -> FINISHED remaining=0
+[136,137) P12 T12          RUNNING -> FINISHED remaining=0
+[137,173) P13 T13          RUNNING -> FINISHED remaining=0
+[173,180) P14 T14          RUNNING -> FINISHED remaining=0
+[180,188) P15 T15          RUNNING -> FINISHED remaining=0
+[188,205) P16 T16          RUNNING -> FINISHED remaining=0
+[205,235) P17 T17          RUNNING -> FINISHED remaining=0
+[235,272) P18 T18          RUNNING -> FINISHED remaining=0
+[272,291) P19 T19          RUNNING -> FINISHED remaining=0
+[291,313) P20 T20          RUNNING -> FINISHED remaining=0
+Run complete at tick 313: no READY or WAITING tasks remain.
+minios> metrics
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   T1               0   13    0     13   13   0    0    1
+2   T2               0   5     13    18   18   13   13   1
+3   T3               0   32    18    50   50   18   18   1
+4   T4               0   23    50    73   73   50   50   1
+5   T5               0   8     73    81   81   73   73   1
+6   T6               0   15    81    96   96   81   81   1
+7   T7               0   13    96    109  109  96   96   1
+8   T8               0   10    109   119  119  109  109  1
+9   T9               0   1     119   120  120  119  119  1
+10  T10              0   7     120   127  127  120  120  1
+11  T11              0   9     127   136  136  127  127  1
+12  T12              0   1     136   137  137  136  136  1
+13  T13              0   36    137   173  173  137  137  1
+14  T14              0   7     173   180  180  173  173  1
+15  T15              0   8     180   188  188  180  180  1
+16  T16              0   17    188   205  205  188  188  1
+17  T17              0   30    205   235  235  205  205  1
+18  T18              0   37    235   272  272  235  235  1
+19  T19              0   19    272   291  291  272  272  1
+20  T20              0   22    291   313  313  291  291  1
+Means (20 finished): turnaround=146.80 waiting=131.15 response=131.15 ticks
+Makespan=313 ticks [0,313) throughput=0.0639 tasks/tick
+Dispatches=20 (all tasks in this experiment)
+CPU utilization=100.00% (busy=313/elapsed=313 ticks; idle time is not modelled, so this is 100% by construction)
+minios> export
+OK: metrics.csv exported (finished tasks only).
+minios> quit
+Shutdown: used_bytes=0 allocations=0

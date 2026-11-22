@@ -1,0 +1,65 @@
+MiniOS for a Study Room | C11 Phase 2 prototype
+One simulated CPU | quantum=2 | payload budget=65536 bytes
+Type help for commands. Notes persist; task state starts fresh on restart.
+minios> quantum 2
+OK: quantum 2
+minios> task create Job1 10 1024
+Created P1 Job1: READY, burst=10, payload=1024 bytes
+minios> task create Job2 10 1024
+Created P2 Job2: READY, burst=10, payload=1024 bytes
+minios> task create Job3 10 1024
+Created P3 Job3: READY, burst=10, payload=1024 bytes
+minios> task create Job4 10 1024
+Created P4 Job4: READY, burst=10, payload=1024 bytes
+minios> task create Job5 10 1024
+Created P5 Job5: READY, burst=10, payload=1024 bytes
+minios> task create Job6 10 1024
+Created P6 Job6: READY, burst=10, payload=1024 bytes
+minios> run
+[0,2) P1 Job1         RUNNING -> READY    remaining=8
+[2,4) P2 Job2         RUNNING -> READY    remaining=8
+[4,6) P3 Job3         RUNNING -> READY    remaining=8
+[6,8) P4 Job4         RUNNING -> READY    remaining=8
+[8,10) P5 Job5         RUNNING -> READY    remaining=8
+[10,12) P6 Job6         RUNNING -> READY    remaining=8
+[12,14) P1 Job1         RUNNING -> READY    remaining=6
+[14,16) P2 Job2         RUNNING -> READY    remaining=6
+[16,18) P3 Job3         RUNNING -> READY    remaining=6
+[18,20) P4 Job4         RUNNING -> READY    remaining=6
+[20,22) P5 Job5         RUNNING -> READY    remaining=6
+[22,24) P6 Job6         RUNNING -> READY    remaining=6
+[24,26) P1 Job1         RUNNING -> READY    remaining=4
+[26,28) P2 Job2         RUNNING -> READY    remaining=4
+[28,30) P3 Job3         RUNNING -> READY    remaining=4
+[30,32) P4 Job4         RUNNING -> READY    remaining=4
+[32,34) P5 Job5         RUNNING -> READY    remaining=4
+[34,36) P6 Job6         RUNNING -> READY    remaining=4
+[36,38) P1 Job1         RUNNING -> READY    remaining=2
+[38,40) P2 Job2         RUNNING -> READY    remaining=2
+[40,42) P3 Job3         RUNNING -> READY    remaining=2
+[42,44) P4 Job4         RUNNING -> READY    remaining=2
+[44,46) P5 Job5         RUNNING -> READY    remaining=2
+[46,48) P6 Job6         RUNNING -> READY    remaining=2
+[48,50) P1 Job1         RUNNING -> FINISHED remaining=0
+[50,52) P2 Job2         RUNNING -> FINISHED remaining=0
+[52,54) P3 Job3         RUNNING -> FINISHED remaining=0
+[54,56) P4 Job4         RUNNING -> FINISHED remaining=0
+[56,58) P5 Job5         RUNNING -> FINISHED remaining=0
+[58,60) P6 Job6         RUNNING -> FINISHED remaining=0
+Run complete at tick 60: no READY or WAITING tasks remain.
+minios> metrics
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   Job1             0   10    0     50   50   40   0    5
+2   Job2             0   10    2     52   52   42   2    5
+3   Job3             0   10    4     54   54   44   4    5
+4   Job4             0   10    6     56   56   46   6    5
+5   Job5             0   10    8     58   58   48   8    5
+6   Job6             0   10    10    60   60   50   10   5
+Means (6 finished): turnaround=55.00 waiting=45.00 response=5.00 ticks
+Makespan=60 ticks [0,60) throughput=0.1000 tasks/tick
+Dispatches=30 (all tasks in this experiment)
+CPU utilization=100.00% (busy=60/elapsed=60 ticks; idle time is not modelled, so this is 100% by construction)
+minios> export
+OK: metrics.csv exported (finished tasks only).
+minios> quit
+Shutdown: used_bytes=0 allocations=0

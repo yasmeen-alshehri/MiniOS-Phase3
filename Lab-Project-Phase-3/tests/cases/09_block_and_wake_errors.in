@@ -1,0 +1,14 @@
+block 1
+wake 1
+task create A 1 1
+wake 1
+block 1
+block 1
+wake 1
+wake 1
+run
+block 1
+wake 1
+block 0
+wake
+check

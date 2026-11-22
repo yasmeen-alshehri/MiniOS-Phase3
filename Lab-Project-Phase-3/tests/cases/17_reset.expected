@@ -1,0 +1,20 @@
+OK: quantum 3
+OK: note create keep
+Created P1 A: READY, burst=9, payload=100 bytes
+Created P2 B: READY, burst=9, payload=200 bytes
+[0,3) P1 A            RUNNING -> READY    remaining=6
+OK: block 2
+Reset: tasks cleared, clock=0, memory=0; notes preserved; quantum retained.
+Tasks | tick=0 quantum=3 records=0/20
+PID NAME                 STATE     BURST LEFT ARRIVAL BYTES
+Ready queue: (empty)
+Memory: used=0/65536 bytes free=65536 allocations=0
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+No finished tasks; means, makespan, and throughput are unavailable.
+Dispatches=0 (all tasks in this experiment)
+CPU utilization unavailable: no virtual time has elapsed.
+still here
+OK: note read keep
+Created P1 C: READY, burst=4, payload=10 bytes
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=1 released_bytes=10

@@ -1,0 +1,41 @@
+MiniOS for a Study Room | C11 Phase 2 prototype
+One simulated CPU | quantum=2 | payload budget=65536 bytes
+Type help for commands. Notes persist; task state starts fresh on restart.
+minios> quantum 1000000
+OK: quantum 1000000
+minios> task create Job1 10 1024
+Created P1 Job1: READY, burst=10, payload=1024 bytes
+minios> task create Job2 10 1024
+Created P2 Job2: READY, burst=10, payload=1024 bytes
+minios> task create Job3 10 1024
+Created P3 Job3: READY, burst=10, payload=1024 bytes
+minios> task create Job4 10 1024
+Created P4 Job4: READY, burst=10, payload=1024 bytes
+minios> task create Job5 10 1024
+Created P5 Job5: READY, burst=10, payload=1024 bytes
+minios> task create Job6 10 1024
+Created P6 Job6: READY, burst=10, payload=1024 bytes
+minios> run
+[0,10) P1 Job1         RUNNING -> FINISHED remaining=0
+[10,20) P2 Job2         RUNNING -> FINISHED remaining=0
+[20,30) P3 Job3         RUNNING -> FINISHED remaining=0
+[30,40) P4 Job4         RUNNING -> FINISHED remaining=0
+[40,50) P5 Job5         RUNNING -> FINISHED remaining=0
+[50,60) P6 Job6         RUNNING -> FINISHED remaining=0
+Run complete at tick 60: no READY or WAITING tasks remain.
+minios> metrics
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   Job1             0   10    0     10   10   0    0    1
+2   Job2             0   10    10    20   20   10   10   1
+3   Job3             0   10    20    30   30   20   20   1
+4   Job4             0   10    30    40   40   30   30   1
+5   Job5             0   10    40    50   50   40   40   1
+6   Job6             0   10    50    60   60   50   50   1
+Means (6 finished): turnaround=35.00 waiting=25.00 response=25.00 ticks
+Makespan=60 ticks [0,60) throughput=0.1000 tasks/tick
+Dispatches=6 (all tasks in this experiment)
+CPU utilization=100.00% (busy=60/elapsed=60 ticks; idle time is not modelled, so this is 100% by construction)
+minios> export
+OK: metrics.csv exported (finished tasks only).
+minios> quit
+Shutdown: used_bytes=0 allocations=0

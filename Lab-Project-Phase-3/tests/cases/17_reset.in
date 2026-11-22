@@ -1,0 +1,14 @@
+# Reset clears tasks, clock, memory, PIDs, and dispatches but keeps quantum and notes.
+quantum 3
+note create keep still here
+task create A 9 100
+task create B 9 200
+step
+block 2
+reset
+tasks
+memory
+metrics
+note read keep
+task create C 4 10
+check

@@ -1,0 +1,9 @@
+Created P1 A: READY, burst=10, payload=1 bytes
+[0,2) P1 A            RUNNING -> READY    remaining=8
+OK: quantum 5
+[2,7) P1 A            RUNNING -> READY    remaining=3
+OK: quantum 1
+[7,8) P1 A            RUNNING -> READY    remaining=2
+OK: quantum 8
+[8,10) P1 A            RUNNING -> FINISHED remaining=0
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

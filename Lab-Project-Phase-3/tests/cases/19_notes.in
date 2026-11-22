@@ -1,0 +1,12 @@
+note create n Finish  the OS project
+note create n other
+note append n Second line
+note read n
+note append absent x
+note read absent
+note delete n
+note delete n
+note read ../etc
+note create n
+note list n
+note read n extra

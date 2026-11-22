@@ -13,7 +13,7 @@ void *memory_allocate(Memory *memory, int owner, size_t bytes, char *error);
 /* Release one owner PID once; false means there is no matching allocation. */
 bool memory_release(Memory *memory, int owner);
 
-/* Free all registered blocks and reset counters and the failure hook. */
+/* Free and deduct every registered block; clear the failure hook. */
 void memory_clear(Memory *memory);
 
 /* Validate registry uniqueness, byte/count totals, and the payload budget. */

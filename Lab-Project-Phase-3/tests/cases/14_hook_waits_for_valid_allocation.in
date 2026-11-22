@@ -1,0 +1,9 @@
+# A budget rejection does not consume the hook; reset disarms it.
+task create Big 1 65536
+debug fail-next-allocation
+task create X 1 1
+run
+task create X 1 1
+debug fail-next-allocation
+reset
+task create Y 1 1

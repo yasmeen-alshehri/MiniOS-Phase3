@@ -1,0 +1,8 @@
+task create A 10 1
+step
+quantum 5
+step
+quantum 1
+step
+quantum 8
+step

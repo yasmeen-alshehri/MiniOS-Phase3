@@ -1,0 +1,7 @@
+pid,name,arrival,burst,first_run,completion,turnaround,waiting,response,dispatches
+1,Job1,0,10,0,50,50,40,0,3
+2,Job2,0,10,4,52,52,42,4,3
+3,Job3,0,10,8,54,54,44,8,3
+4,Job4,0,10,12,56,56,46,12,3
+5,Job5,0,10,16,58,58,48,16,3
+6,Job6,0,10,20,60,60,50,20,3

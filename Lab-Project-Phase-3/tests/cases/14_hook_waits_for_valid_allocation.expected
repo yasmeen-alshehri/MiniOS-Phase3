@@ -1,0 +1,10 @@
+Created P1 Big: READY, burst=1, payload=65536 bytes
+Debug hook armed: next valid allocation will fail.
+ERROR: Memory budget exceeded: requested=1 free=0 bytes.
+[0,1) P1 Big          RUNNING -> FINISHED remaining=0
+Run complete at tick 1: no READY or WAITING tasks remain.
+ERROR: Forced allocation failure; no task was created.
+Debug hook armed: next valid allocation will fail.
+Reset: tasks cleared, clock=0, memory=0; notes preserved; quantum retained.
+Created P1 Y: READY, burst=1, payload=1 bytes
+Shutdown: used_bytes=0 allocations=0 released_allocations=1 released_bytes=1

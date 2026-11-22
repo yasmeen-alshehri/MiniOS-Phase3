@@ -1,0 +1,26 @@
+Created P1 Study: READY, burst=6, payload=1024 bytes
+Created P2 Review: READY, burst=4, payload=512 bytes
+Created P3 Practice: READY, burst=3, payload=256 bytes
+Memory: used=1792/65536 bytes free=63744 allocations=3
+OK: block 2
+[0,2) P1 Study        RUNNING -> READY    remaining=4
+OK: wake 2
+[2,4) P3 Practice     RUNNING -> READY    remaining=1
+[4,6) P1 Study        RUNNING -> READY    remaining=2
+[6,8) P2 Review       RUNNING -> READY    remaining=2
+[8,9) P3 Practice     RUNNING -> FINISHED remaining=0
+SESSION COMPLETE: P3 Practice at tick 9
+[9,11) P1 Study        RUNNING -> FINISHED remaining=0
+[11,13) P2 Review       RUNNING -> FINISHED remaining=0
+Run complete at tick 13: no READY or WAITING tasks remain.
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   Study            0   6     0     11   11   5    0    3
+2   Review           0   4     6     13   13   7    6    2
+3   Practice         0   3     2     9    9    6    2    2
+Means (3 finished): turnaround=11.00 waiting=6.00 response=2.67 ticks
+Makespan=13 ticks [0,13) throughput=0.2308 tasks/tick
+Dispatches=7 (all tasks in this experiment)
+CPU utilization=100.00% (busy=13/elapsed=13 ticks; idle time is not modelled, so this is 100% by construction)
+Memory: used=0/65536 bytes free=65536 allocations=0
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

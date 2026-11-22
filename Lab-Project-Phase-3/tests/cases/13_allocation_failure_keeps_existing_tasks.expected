@@ -1,0 +1,11 @@
+Created P1 A: READY, burst=2, payload=100 bytes
+Debug hook armed: next valid allocation will fail.
+ERROR: Forced allocation failure; no task was created.
+Tasks | tick=0 quantum=2 records=1/20
+PID NAME                 STATE     BURST LEFT ARRIVAL BYTES
+1   A                    READY     2     2    0       100
+Ready queue: P1
+Memory: used=100/65536 bytes free=65436 allocations=1
+Created P2 S: READY, burst=2, payload=50 bytes
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=2 released_bytes=150

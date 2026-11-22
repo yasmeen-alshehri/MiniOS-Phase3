@@ -1,0 +1,11 @@
+Created P1 A: READY, burst=2, payload=8 bytes
+Created P2 B: READY, burst=2, payload=8 bytes
+OK: block 1
+OK: block 2
+IDLE: no READY tasks; virtual clock remains 0.
+IDLE: no READY tasks; virtual clock remains 0.
+OK: wake 2
+[0,2) P2 B            RUNNING -> FINISHED remaining=0
+Run paused at tick 2: ready queue empty; 1 WAITING task(s) need wake.
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=1 released_bytes=8

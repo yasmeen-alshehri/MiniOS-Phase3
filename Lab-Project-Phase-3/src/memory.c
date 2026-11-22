@@ -83,16 +83,23 @@ bool memory_release(Memory *m, int owner) {
 }
 
 /**
- * Free all remaining registered payloads and reset accounting/failure state.
+ * Free all remaining registered payloads and disarm the failure hook.
+ * Deduct each block instead of zeroing the totals, so that a nonzero remainder
+ * exposes an accounting error in reset or in the shutdown statistics.
  * Used by reset and shutdown, including when tasks are unfinished or WAITING.
  */
 void memory_clear(Memory *m) {
     size_t i;
     for (i = 0; i < MAX_TASKS; ++i) {
-        if (m->records[i].pointer)
-            free(m->records[i].pointer);
+        AllocationRecord *r = &m->records[i];
+        if (!r->pointer)
+            continue;
+        free(r->pointer);
+        m->used -= r->bytes;
+        --m->count;
+        *r = (AllocationRecord){0};
     }
-    memset(m, 0, sizeof *m);
+    m->fail_next = false;
 }
 
 /**

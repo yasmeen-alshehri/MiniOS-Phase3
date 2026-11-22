@@ -1,0 +1,9 @@
+# W2 uniform CPU-bound: 6 identical tasks of 10 ticks, all at tick 0.
+# Hand-checkable: FCFS mean turnaround = (10+20+...+60)/6 = 35;
+# RR with quantum 1 finishes task i at 54+i, so mean turnaround = 57.5.
+task create Job1 10 1024
+task create Job2 10 1024
+task create Job3 10 1024
+task create Job4 10 1024
+task create Job5 10 1024
+task create Job6 10 1024

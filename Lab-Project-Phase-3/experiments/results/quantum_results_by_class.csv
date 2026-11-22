@@ -1,0 +1,21 @@
+workload,policy,quantum,class,tasks,mean_waiting,mean_turnaround,mean_response
+W1_mixed,RR q1,1,CPU,4,53.75,70.75,2.50
+W1_mixed,RR q1,1,Inter,4,10.75,12.75,4.50
+W1_mixed,RR q2,2,CPU,4,53.50,70.50,4.75
+W1_mixed,RR q2,2,Inter,4,11.50,13.50,8.75
+W1_mixed,RR q4,4,CPU,4,54.00,71.00,8.00
+W1_mixed,RR q4,4,Inter,4,15.25,17.25,15.25
+W1_mixed,RR q8,8,CPU,4,52.00,69.00,14.00
+W1_mixed,RR q8,8,Inter,4,27.25,29.25,27.25
+W1_mixed,FCFS,1000000,CPU,4,29.50,46.50,29.50
+W1_mixed,FCFS,1000000,Inter,4,56.25,58.25,56.25
+W2_uniform,RR q1,1,Job,6,47.50,57.50,2.50
+W2_uniform,RR q2,2,Job,6,45.00,55.00,5.00
+W2_uniform,RR q4,4,Job,6,45.00,55.00,10.00
+W2_uniform,RR q8,8,Job,6,45.00,55.00,20.00
+W2_uniform,FCFS,1000000,Job,6,25.00,35.00,25.00
+W3_stress,RR q1,1,T,20,170.90,186.55,9.50
+W3_stress,RR q2,2,T,20,172.20,187.85,18.05
+W3_stress,RR q4,4,T,20,171.45,187.10,35.15
+W3_stress,RR q8,8,T,20,160.60,176.25,65.85
+W3_stress,FCFS,1000000,T,20,131.15,146.80,131.15

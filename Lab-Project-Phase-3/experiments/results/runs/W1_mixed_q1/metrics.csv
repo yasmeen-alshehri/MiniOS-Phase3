@@ -1,0 +1,9 @@
+pid,name,arrival,burst,first_run,completion,turnaround,waiting,response,dispatches
+1,CPU1,0,20,0,76,76,56,0,20
+2,CPU2,0,16,1,69,69,53,1,16
+3,Inter1,0,2,2,11,11,9,2,2
+4,CPU3,0,18,3,74,74,56,3,18
+5,Inter2,0,3,4,19,19,16,4,3
+6,Inter3,0,1,5,6,6,5,5,1
+7,CPU4,0,14,6,64,64,50,6,14
+8,Inter4,0,2,7,15,15,13,7,2

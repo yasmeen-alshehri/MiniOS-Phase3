@@ -1,0 +1,10 @@
+# W1 mixed: 4 CPU-bound tasks (CPU*) and 4 short interactive tasks (Inter*), all at tick 0.
+# CPU-bound tasks are created first, so FCFS exposes the convoy effect on short tasks.
+task create CPU1 20 4096
+task create CPU2 16 4096
+task create Inter1 2 512
+task create CPU3 18 4096
+task create Inter2 3 512
+task create Inter3 1 512
+task create CPU4 14 4096
+session start Inter4 2 512

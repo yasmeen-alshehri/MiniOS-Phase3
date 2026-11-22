@@ -1,0 +1,81 @@
+MiniOS for a Study Room | C11 Phase 2 prototype
+One simulated CPU | quantum=2 | payload budget=65536 bytes
+Type help for commands. Notes persist; task state starts fresh on restart.
+minios> quantum 2
+OK: quantum 2
+minios> task create CPU1 20 4096
+Created P1 CPU1: READY, burst=20, payload=4096 bytes
+minios> task create CPU2 16 4096
+Created P2 CPU2: READY, burst=16, payload=4096 bytes
+minios> task create Inter1 2 512
+Created P3 Inter1: READY, burst=2, payload=512 bytes
+minios> task create CPU3 18 4096
+Created P4 CPU3: READY, burst=18, payload=4096 bytes
+minios> task create Inter2 3 512
+Created P5 Inter2: READY, burst=3, payload=512 bytes
+minios> task create Inter3 1 512
+Created P6 Inter3: READY, burst=1, payload=512 bytes
+minios> task create CPU4 14 4096
+Created P7 CPU4: READY, burst=14, payload=4096 bytes
+minios> session start Inter4 2 512
+Created P8 Inter4: READY, burst=2, payload=512 bytes
+minios> run
+[0,2) P1 CPU1         RUNNING -> READY    remaining=18
+[2,4) P2 CPU2         RUNNING -> READY    remaining=14
+[4,6) P3 Inter1       RUNNING -> FINISHED remaining=0
+[6,8) P4 CPU3         RUNNING -> READY    remaining=16
+[8,10) P5 Inter2       RUNNING -> READY    remaining=1
+[10,11) P6 Inter3       RUNNING -> FINISHED remaining=0
+[11,13) P7 CPU4         RUNNING -> READY    remaining=12
+[13,15) P8 Inter4       RUNNING -> FINISHED remaining=0
+SESSION COMPLETE: P8 Inter4 at tick 15
+[15,17) P1 CPU1         RUNNING -> READY    remaining=16
+[17,19) P2 CPU2         RUNNING -> READY    remaining=12
+[19,21) P4 CPU3         RUNNING -> READY    remaining=14
+[21,22) P5 Inter2       RUNNING -> FINISHED remaining=0
+[22,24) P7 CPU4         RUNNING -> READY    remaining=10
+[24,26) P1 CPU1         RUNNING -> READY    remaining=14
+[26,28) P2 CPU2         RUNNING -> READY    remaining=10
+[28,30) P4 CPU3         RUNNING -> READY    remaining=12
+[30,32) P7 CPU4         RUNNING -> READY    remaining=8
+[32,34) P1 CPU1         RUNNING -> READY    remaining=12
+[34,36) P2 CPU2         RUNNING -> READY    remaining=8
+[36,38) P4 CPU3         RUNNING -> READY    remaining=10
+[38,40) P7 CPU4         RUNNING -> READY    remaining=6
+[40,42) P1 CPU1         RUNNING -> READY    remaining=10
+[42,44) P2 CPU2         RUNNING -> READY    remaining=6
+[44,46) P4 CPU3         RUNNING -> READY    remaining=8
+[46,48) P7 CPU4         RUNNING -> READY    remaining=4
+[48,50) P1 CPU1         RUNNING -> READY    remaining=8
+[50,52) P2 CPU2         RUNNING -> READY    remaining=4
+[52,54) P4 CPU3         RUNNING -> READY    remaining=6
+[54,56) P7 CPU4         RUNNING -> READY    remaining=2
+[56,58) P1 CPU1         RUNNING -> READY    remaining=6
+[58,60) P2 CPU2         RUNNING -> READY    remaining=2
+[60,62) P4 CPU3         RUNNING -> READY    remaining=4
+[62,64) P7 CPU4         RUNNING -> FINISHED remaining=0
+[64,66) P1 CPU1         RUNNING -> READY    remaining=4
+[66,68) P2 CPU2         RUNNING -> FINISHED remaining=0
+[68,70) P4 CPU3         RUNNING -> READY    remaining=2
+[70,72) P1 CPU1         RUNNING -> READY    remaining=2
+[72,74) P4 CPU3         RUNNING -> FINISHED remaining=0
+[74,76) P1 CPU1         RUNNING -> FINISHED remaining=0
+Run complete at tick 76: no READY or WAITING tasks remain.
+minios> metrics
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   CPU1             0   20    0     76   76   56   0    10
+2   CPU2             0   16    2     68   68   52   2    8
+3   Inter1           0   2     4     6    6    4    4    1
+4   CPU3             0   18    6     74   74   56   6    9
+5   Inter2           0   3     8     22   22   19   8    2
+6   Inter3           0   1     10    11   11   10   10   1
+7   CPU4             0   14    11    64   64   50   11   7
+8   Inter4           0   2     13    15   15   13   13   1
+Means (8 finished): turnaround=42.00 waiting=32.50 response=6.75 ticks
+Makespan=76 ticks [0,76) throughput=0.1053 tasks/tick
+Dispatches=39 (all tasks in this experiment)
+CPU utilization=100.00% (busy=76/elapsed=76 ticks; idle time is not modelled, so this is 100% by construction)
+minios> export
+OK: metrics.csv exported (finished tasks only).
+minios> quit
+Shutdown: used_bytes=0 allocations=0

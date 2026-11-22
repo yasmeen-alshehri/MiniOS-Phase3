@@ -1,0 +1,10 @@
+Created P1 A: READY, burst=1, payload=40000 bytes
+ERROR: Memory budget exceeded: requested=25537 free=25536 bytes.
+Created P2 B: READY, burst=1, payload=25536 bytes
+ERROR: Memory budget exceeded: requested=1 free=0 bytes.
+Memory: used=65536/65536 bytes free=0 allocations=2
+[0,1) P1 A            RUNNING -> FINISHED remaining=0
+Memory: used=25536/65536 bytes free=40000 allocations=1
+Created P3 C: READY, burst=1, payload=40000 bytes
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=2 released_bytes=65536

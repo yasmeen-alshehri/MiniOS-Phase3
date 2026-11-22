@@ -1,0 +1,23 @@
+# W3 stress: 20 tasks (task table full), all arriving at tick 0.
+# Bursts 1..40 ticks and payloads drawn once with random.Random(433); fixed here for reproducibility.
+# Total payload stays below the 65,536-byte budget.
+task create T1 13 2048
+task create T2 5 256
+task create T3 32 3072
+task create T4 23 1024
+task create T5 8 3072
+task create T6 15 3072
+task create T7 13 2048
+task create T8 10 1024
+task create T9 1 256
+task create T10 7 256
+task create T11 9 2048
+task create T12 1 3072
+task create T13 36 3072
+task create T14 7 512
+task create T15 8 3072
+task create T16 17 512
+task create T17 30 2048
+task create T18 37 256
+task create T19 19 256
+task create T20 22 3072

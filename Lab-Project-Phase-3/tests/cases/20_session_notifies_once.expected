@@ -1,0 +1,10 @@
+Created P1 S: READY, burst=3, payload=5 bytes
+Created P2 T: READY, burst=1, payload=5 bytes
+[0,2) P1 S            RUNNING -> READY    remaining=1
+[2,3) P2 T            RUNNING -> FINISHED remaining=0
+[3,4) P1 S            RUNNING -> FINISHED remaining=0
+SESSION COMPLETE: P1 S at tick 4
+Run complete at tick 4: no READY or WAITING tasks remain.
+IDLE: no READY tasks; virtual clock remains 4.
+IDLE: no READY tasks; virtual clock remains 4.
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0
