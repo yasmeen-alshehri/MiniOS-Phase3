@@ -1,0 +1,6 @@
+# README example: order P1 P2 P3 P1 P2, finishing at tick 9.
+session start Study 4 256
+task create Review 3 128
+task create Practice 2 64
+run
+metrics

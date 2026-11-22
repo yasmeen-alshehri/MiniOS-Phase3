@@ -104,13 +104,20 @@ void app_reset(App *app) {
 }
 
 /**
- * Release remaining payloads, log zero tracked allocations, and close files.
+ * Release remaining payloads, log the measured cleanup totals, and close files.
  * Use only after successful initialization. Task records are not reused after
  * shutdown; their pointers are no longer valid for further scheduling.
  */
 void app_shutdown(App *app) {
+    size_t bytes = app->memory.used, count = app->memory.count;
+    char detail[160];
     memory_clear(&app->memory);
-    logger_event(app, "SHUTDOWN", 0, "used_bytes=0 allocations=0");
+    /* The counters now hold whatever the cleanup did not account for. */
+    snprintf(detail, sizeof detail,
+             "used_bytes=%zu allocations=%zu released_allocations=%zu released_bytes=%zu",
+             app->memory.used, app->memory.count, count - app->memory.count,
+             bytes - app->memory.used);
+    logger_event(app, "SHUTDOWN", 0, detail);
     if (app->trace && fclose(app->trace) != 0) {
         ++app->logger.failures;
         fprintf(stderr, "WARNING: trace close failed.\n");
@@ -120,20 +127,64 @@ void app_shutdown(App *app) {
 }
 
 /**
+ * Check one record's identity, progress, and timing against the virtual clock.
+ * first_run and completion are bounded before they are used in later sums.
+ */
+static bool task_check(const App *app, const Task *t, int pid) {
+    long long executed, end;
+    bool finished = t->state == FINISHED;
+    if (t->pid != pid || !memchr(t->name, '\0', sizeof t->name) || !valid_name(t->name))
+        return false;
+    if (t->state != READY && t->state != WAITING && !finished)
+        return false;
+    if (t->burst < 1 || t->burst > MAX_TICKS || t->remaining < 0 || t->remaining > t->burst)
+        return false;
+    if (finished != (t->remaining == 0) || t->payload_bytes == 0 || t->payload_bytes > MEMORY_BUDGET)
+        return false;
+    /* A session is notified in the same dispatch that finishes it. */
+    if (t->notified != (t->is_session && finished))
+        return false;
+    /* Every dispatch executes at least one tick. */
+    executed = t->burst - t->remaining;
+    if (t->dispatches > executed || t->dispatches < (executed ? 1 : 0))
+        return false;
+    if (executed == 0) {
+        if (t->first_run != -1)
+            return false;
+    } else if (t->first_run < t->arrival || t->first_run > app->now - executed)
+        return false;
+    if (finished) {
+        if (t->completion > app->now || t->completion < t->first_run + t->burst)
+            return false;
+    } else if (t->completion != -1)
+        return false;
+    /* A tick is spent running, READY, or WAITING; this also bounds arrival by now. */
+    end = finished ? t->completion : app->now;
+    return t->ready_wait >= 0 && t->ready_wait <= end - t->arrival - executed;
+}
+
+/**
  * Check consistency at a command boundary, when no task is RUNNING.
+ * PIDs are dense from 1, arrivals follow creation order, and the clock moves only
+ * while a task runs, so executed ticks must add up to the virtual time.
  * Cross-check READY queue membership and payload ownership against task records.
  * Return false if a checked relationship or accounting total is inconsistent.
  */
 bool app_check(const App *app) {
     size_t i, j, active = 0;
+    long long previous_arrival = 0, busy = 0;
     if (!memory_check(&app->memory) || app->task_count > MAX_TASKS ||
         app->queue.count > MAX_TASKS || app->queue.head >= MAX_TASKS) return false;
+    if (app->quantum < 1 || app->quantum > MAX_TICKS || app->experiment < 1 ||
+        app->next_pid != (int)app->task_count + 1) return false;
     /* Each retained record must agree with both the queue and registry. */
     for (i = 0; i < app->task_count; ++i) {
         const Task *t = &app->tasks[i];
         size_t queued = 0, owned = 0;
-        if (t->state == RUNNING || t->remaining < 0 || t->remaining > t->burst)
+        if (!task_check(app, t, (int)i + 1) || t->arrival < previous_arrival)
             return false;
+        previous_arrival = t->arrival;
+        busy += t->burst - t->remaining;
         for (j = 0; j < app->queue.count; ++j)
             if (app->queue.ids[(app->queue.head + j) % MAX_TASKS] == t->pid)
                 ++queued;
@@ -155,6 +206,8 @@ bool app_check(const App *app) {
         } else if (!t->payload || owned != 1)
             return false;
     }
+    if (busy != app->now)
+        return false;
     /* No extra queue entries may refer to missing or non-READY tasks. */
     if (active != app->queue.count)
         return false;

@@ -207,8 +207,9 @@ syntax:
  */
 int shell_run(App *app, bool interactive) {
     char line[LINE_SIZE];
+    size_t bytes, count;
     int result = 0;
-    puts("MiniOS for a Study Room | C11 Phase 2 prototype");
+    puts("MiniOS for a Study Room | C11 Phase 3");
     printf("One simulated CPU | quantum=%d | payload budget=%u bytes\n", app->quantum, MEMORY_BUDGET);
     puts("Type help for commands. Notes persist; task state starts fresh on restart.");
     while (true) {
@@ -248,7 +249,11 @@ int shell_run(App *app, bool interactive) {
         result = 1;
     }
     /* EOF follows the same cleanup path as the quit command. */
+    bytes = app->memory.used;
+    count = app->memory.count;
     app_shutdown(app);
-    puts("Shutdown: used_bytes=0 allocations=0");
+    printf("Shutdown: used_bytes=%zu allocations=%zu released_allocations=%zu released_bytes=%zu\n",
+           app->memory.used, app->memory.count, count - app->memory.count,
+           bytes - app->memory.used);
     return result || app->logger.failures ? 1 : 0;
 }

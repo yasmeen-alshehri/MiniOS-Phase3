@@ -32,6 +32,8 @@ typedef struct {
     TaskState state;
     /* Original requested work and work still to execute, in virtual ticks. */
     int burst, remaining;
+    /* CPU slices granted so far; reset clears it with the record. */
+    int dispatches;
     /* first_run/completion are -1 until their events occur. */
     /* ready_wait counts only READY time and excludes WAITING intervals. */
     long long arrival, first_run, completion, ready_wait;
@@ -87,7 +89,7 @@ void app_shutdown(App *app);
 /* Release payloads and clear task state; preserve notes, quantum, and streams. */
 void app_reset(App *app);
 
-/* Check queue membership and payload ownership between commands. */
+/* Check task, clock, queue, and payload invariants between commands. */
 bool app_check(const App *app);
 
 /* Return a static display label; the caller must not free it. */

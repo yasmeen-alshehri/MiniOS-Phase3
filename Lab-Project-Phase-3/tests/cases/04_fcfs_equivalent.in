@@ -1,0 +1,7 @@
+# A quantum no shorter than any burst is FCFS.
+quantum 1000000
+task create Long 9 1
+task create Short 1 1
+task create Mid 4 1
+run
+metrics

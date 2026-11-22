@@ -1,0 +1,4 @@
+quantum 1
+task create A 3 1
+task create B 2 1
+run

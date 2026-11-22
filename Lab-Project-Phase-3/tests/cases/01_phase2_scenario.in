@@ -1,0 +1,13 @@
+# Phase 2 report, Figures 2-4: block, step, wake, run with quantum 2.
+task create Study 6 1024
+task create Review 4 512
+session start Practice 3 256
+memory
+block 2
+step
+wake 2
+run
+metrics
+memory
+check
+quit

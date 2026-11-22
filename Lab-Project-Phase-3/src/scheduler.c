@@ -61,12 +61,28 @@ bool queue_remove(ReadyQueue *queue, int pid) {
     return false;
 }
 
+/* run echoes at most this many slices to the console and event log; every
+ * slice is still written to trace.csv, which remains the complete record. */
+#define RUN_ECHO_LIMIT 200
+
+/**
+ * Flush the trace once and count a detected failure.
+ */
+static void trace_flush(App *app) {
+    if (app->trace && fflush(app->trace) != 0) {
+        ++app->logger.failures;
+        fprintf(stderr, "WARNING: scheduling trace flush failed.\n");
+    }
+}
+
 /**
  * Dispatch one READY task for a single round-robin slice.
  * Count READY-only waiting, update first/completion times, and finish or requeue.
  * Return false when idle or when a queue entry is invalid; idle keeps time fixed.
+ * With echo false, omit the console line and the per-slice DISPATCH/SLICE events
+ * (a finishing slice is still logged) and leave the trace flush to the caller.
  */
-bool scheduler_step(App *app, FILE *out) {
+static bool dispatch_slice(App *app, FILE *out, bool echo) {
     int pid, slice;
     size_t i;
     long long start;
@@ -86,7 +102,9 @@ bool scheduler_step(App *app, FILE *out) {
     /* 2. Dispatch it and limit the slice to its actual remaining work. */
     start = app->now;
     task->state = RUNNING;
-    logger_event(app, "DISPATCH", pid, "READY->RUNNING");
+    ++task->dispatches;
+    if (echo)
+        logger_event(app, "DISPATCH", pid, "READY->RUNNING");
     if (task->first_run < 0)
         task->first_run = start;
     slice = task->remaining < app->quantum ? task->remaining : app->quantum;
@@ -109,74 +127,148 @@ bool scheduler_step(App *app, FILE *out) {
         (void)queue_push(&app->queue, pid);
     }
     /* 5. Persist the observed slice and then check for session completion. */
-    fprintf(out, "[%lld,%lld) P%d %-12.12s RUNNING -> %-8s remaining=%d\n",
-            start, app->now, pid, task->name, state_name(task->state), task->remaining);
-    snprintf(detail, sizeof detail, "start=%lld end=%lld remaining=%d state=%s used_bytes=%zu",
-             start, app->now, task->remaining, state_name(task->state), app->memory.used);
-    logger_event(app, "SLICE", pid, detail);
+    if (echo)
+        fprintf(out, "[%lld,%lld) P%d %-12.12s RUNNING -> %-8s remaining=%d\n",
+                start, app->now, pid, task->name, state_name(task->state), task->remaining);
+    if (echo || task->state == FINISHED) {
+        snprintf(detail, sizeof detail, "start=%lld end=%lld remaining=%d state=%s used_bytes=%zu",
+                 start, app->now, task->remaining, state_name(task->state), app->memory.used);
+        logger_event(app, "SLICE", pid, detail);
+    }
     if (app->trace &&
-        (fprintf(app->trace, "%d,%d,%lld,%lld,%d,%s\n", app->experiment, pid, start,
-                 app->now, task->remaining, state_name(task->state)) < 0 ||
-         fflush(app->trace) != 0)) {
+        fprintf(app->trace, "%d,%d,%lld,%lld,%d,%s\n", app->experiment, pid, start,
+                app->now, task->remaining, state_name(task->state)) < 0) {
         ++app->logger.failures;
         fprintf(stderr, "WARNING: scheduling trace write failed.\n");
     }
+    if (echo)
+        trace_flush(app);
     session_complete(app, task, out);
     return true;
 }
 
 /**
+ * Run one slice with full console, event, and trace output.
+ */
+bool scheduler_step(App *app, FILE *out) {
+    return dispatch_slice(app, out, true);
+}
+
+/**
  * Execute slices until the ready queue is empty or dispatch fails.
  * WAITING tasks remain blocked; the scheduler never wakes them automatically.
+ * Only the first RUN_ECHO_LIMIT slices are echoed; the trace keeps all of them.
  */
 void scheduler_run(App *app, FILE *out) {
+    long long slices = 0, hidden = 0;
+    size_t i, waiting = 0;
+    bool stopped = false;
+    char detail[160];
     if (app->queue.count == 0) {
         (void)scheduler_step(app, out);
         return;
     }
-    while (app->queue.count > 0)
-        if (!scheduler_step(app, out))
+    while (app->queue.count > 0) {
+        bool echo = slices < RUN_ECHO_LIMIT;
+        if (!dispatch_slice(app, out, echo)) {
+            stopped = true;
             break;
-    fprintf(out, "Run paused: ready queue empty; WAITING tasks need wake.\n");
+        }
+        ++slices;
+        if (!echo)
+            ++hidden;
+    }
+    trace_flush(app);
+    if (hidden)
+        fprintf(out, "... %lld further slice(s) not shown; full record in %s/trace.csv\n",
+                hidden, app->data_dir);
+    snprintf(detail, sizeof detail, "slices=%lld hidden=%lld end=%lld", slices, hidden, app->now);
+    logger_event(app, "RUN", 0, detail);
+    if (stopped) {
+        fprintf(out, "Run stopped: %s\n", app->error);
+        return;
+    }
+    /* Mention blocked work only when some task is actually WAITING. */
+    for (i = 0; i < app->task_count; ++i)
+        if (app->tasks[i].state == WAITING)
+            ++waiting;
+    if (waiting)
+        fprintf(out, "Run paused at tick %lld: ready queue empty; %zu WAITING task(s) need wake.\n",
+                app->now, waiting);
+    else
+        fprintf(out, "Run complete at tick %lld: no READY or WAITING tasks remain.\n", app->now);
 }
 
 /**
  * Print completed-task metrics as a console table or CSV.
  * Turnaround = completion - arrival; response = first run - arrival.
  * Waiting comes from the READY counter, which correctly excludes blocked time.
+ *
+ * The console form also prints system-wide metrics for the current experiment:
+ *   dispatches  = slices granted to all retained tasks, including unfinished ones;
+ *   makespan    = latest completion - earliest arrival, over FINISHED tasks;
+ *   throughput  = finished tasks / makespan (makespan >= 1 because bursts >= 1);
+ *   utilization = busy ticks / elapsed ticks, busy = sum(burst - remaining).
+ * The clock advances only inside slices, so busy always equals elapsed time:
+ * utilization is 100% by model construction and is labelled as such.
  */
 void metrics_print(const App *app, FILE *out, bool csv) {
-    size_t i, completed = 0;
+    size_t i, completed = 0, unfinished = 0;
     double turnaround_sum = 0, waiting_sum = 0, response_sum = 0;
-    fputs(csv ? "pid,name,arrival,burst,first_run,completion,turnaround,waiting,response\n" :
-          "PID NAME             ARR BURST FIRST DONE TURN WAIT RESP\n", out);
+    long long dispatches = 0, busy = 0, first_arrival = 0, last_completion = 0;
+    fputs(csv ? "pid,name,arrival,burst,first_run,completion,turnaround,waiting,response,dispatches\n" :
+          "PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP\n", out);
     for (i = 0; i < app->task_count; ++i) {
         const Task *t = &app->tasks[i];
         long long turnaround, response;
-        if (t->state != FINISHED)
+        /* System totals include unfinished tasks because their slices used the CPU. */
+        dispatches += t->dispatches;
+        busy += t->burst - t->remaining;
+        if (t->state != FINISHED) {
+            ++unfinished;
             continue;
+        }
         /* Incomplete tasks have no final metrics and were skipped above. */
         turnaround = t->completion - t->arrival;
         response = t->first_run - t->arrival;
         if (csv)
-            fprintf(out, "%d,%s,%lld,%d,%lld,%lld,%lld,%lld,%lld\n", t->pid, t->name,
-                    t->arrival, t->burst, t->first_run, t->completion, turnaround, t->ready_wait, response);
+            fprintf(out, "%d,%s,%lld,%d,%lld,%lld,%lld,%lld,%lld,%d\n", t->pid, t->name,
+                    t->arrival, t->burst, t->first_run, t->completion, turnaround, t->ready_wait,
+                    response, t->dispatches);
         else
-            fprintf(out, "%-3d %-16.16s %-3lld %-5d %-5lld %-4lld %-4lld %-4lld %lld\n",
+            fprintf(out, "%-3d %-16.16s %-3lld %-5d %-5lld %-4lld %-4lld %-4lld %-4lld %d\n",
                     t->pid, t->name, t->arrival, t->burst, t->first_run, t->completion,
-                    turnaround, t->ready_wait, response);
+                    turnaround, t->ready_wait, response, t->dispatches);
+        if (completed == 0 || t->arrival < first_arrival)
+            first_arrival = t->arrival;
+        if (completed == 0 || t->completion > last_completion)
+            last_completion = t->completion;
         ++completed;
         turnaround_sum += (double)turnaround;
         waiting_sum += (double)t->ready_wait;
         response_sum += (double)response;
     }
-    if (!csv) {
-        if (completed)
-            fprintf(out, "Means (%zu finished): turnaround=%.2f waiting=%.2f response=%.2f ticks\n",
-                    completed, turnaround_sum / completed, waiting_sum / completed, response_sum / completed);
-        else
-            fputs("No finished tasks; means are unavailable.\n", out);
-    }
+    if (csv)
+        return;
+    if (completed) {
+        long long makespan = last_completion - first_arrival;
+        fprintf(out, "Means (%zu finished): turnaround=%.2f waiting=%.2f response=%.2f ticks\n",
+                completed, turnaround_sum / (double)completed, waiting_sum / (double)completed,
+                response_sum / (double)completed);
+        fprintf(out, "Makespan=%lld ticks [%lld,%lld) throughput=%.4f tasks/tick\n", makespan,
+                first_arrival, last_completion, (double)completed / (double)makespan);
+    } else
+        fputs("No finished tasks; means, makespan, and throughput are unavailable.\n", out);
+    if (unfinished)
+        fprintf(out, "Note: %zu unfinished task(s) excluded from means, makespan, and throughput.\n",
+                unfinished);
+    fprintf(out, "Dispatches=%lld (all tasks in this experiment)\n", dispatches);
+    if (app->now > 0)
+        fprintf(out, "CPU utilization=%.2f%% (busy=%lld/elapsed=%lld ticks; idle time is not "
+                "modelled, so this is 100%% by construction)\n",
+                100.0 * (double)busy / (double)app->now, busy, app->now);
+    else
+        fputs("CPU utilization unavailable: no virtual time has elapsed.\n", out);
 }
 
 /**

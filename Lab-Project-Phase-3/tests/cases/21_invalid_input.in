@@ -1,0 +1,16 @@
+bogus
+task
+task start A 1 1
+session create A 1 1
+task create A 0 1
+task create A 1000001 1
+task create A 1 0
+task create A 1 65537
+task create A 1 1 extra
+task create bad.name 1 1
+quantum 0
+quantum 1000001
+quantum
+tasks extra
+debug other
+check

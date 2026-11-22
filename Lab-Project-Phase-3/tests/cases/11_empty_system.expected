@@ -1,0 +1,12 @@
+Tasks | tick=0 quantum=2 records=0/20
+PID NAME                 STATE     BURST LEFT ARRIVAL BYTES
+Ready queue: (empty)
+IDLE: no READY tasks; virtual clock remains 0.
+IDLE: no READY tasks; virtual clock remains 0.
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+No finished tasks; means, makespan, and throughput are unavailable.
+Dispatches=0 (all tasks in this experiment)
+CPU utilization unavailable: no virtual time has elapsed.
+Memory: used=0/65536 bytes free=65536 allocations=0
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

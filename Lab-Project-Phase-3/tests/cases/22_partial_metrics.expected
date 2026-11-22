@@ -1,0 +1,12 @@
+Created P1 A: READY, burst=1, payload=4 bytes
+Created P2 B: READY, burst=5, payload=6 bytes
+[0,1) P1 A            RUNNING -> FINISHED remaining=0
+[1,3) P2 B            RUNNING -> READY    remaining=3
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   A                0   1     0     1    1    0    0    1
+Means (1 finished): turnaround=1.00 waiting=0.00 response=0.00 ticks
+Makespan=1 ticks [0,1) throughput=1.0000 tasks/tick
+Note: 1 unfinished task(s) excluded from means, makespan, and throughput.
+Dispatches=2 (all tasks in this experiment)
+CPU utilization=100.00% (busy=3/elapsed=3 ticks; idle time is not modelled, so this is 100% by construction)
+Shutdown: used_bytes=0 allocations=0 released_allocations=1 released_bytes=6

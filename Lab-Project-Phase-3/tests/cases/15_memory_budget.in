@@ -1,0 +1,9 @@
+task create A 1 40000
+task create B 1 25537
+task create B 1 25536
+task create C 1 1
+memory
+step
+memory
+task create C 1 40000
+check

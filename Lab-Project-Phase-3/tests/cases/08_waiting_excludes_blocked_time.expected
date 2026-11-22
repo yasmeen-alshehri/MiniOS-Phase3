@@ -1,0 +1,18 @@
+Created P1 A: READY, burst=6, payload=1 bytes
+Created P2 B: READY, burst=2, payload=1 bytes
+[0,2) P1 A            RUNNING -> READY    remaining=4
+OK: block 2
+[2,4) P1 A            RUNNING -> READY    remaining=2
+[4,6) P1 A            RUNNING -> FINISHED remaining=0
+Run paused at tick 6: ready queue empty; 1 WAITING task(s) need wake.
+OK: wake 2
+[6,8) P2 B            RUNNING -> FINISHED remaining=0
+Run complete at tick 8: no READY or WAITING tasks remain.
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   A                0   6     0     6    6    0    0    3
+2   B                0   2     6     8    8    2    6    1
+Means (2 finished): turnaround=7.00 waiting=1.00 response=3.00 ticks
+Makespan=8 ticks [0,8) throughput=0.2500 tasks/tick
+Dispatches=4 (all tasks in this experiment)
+CPU utilization=100.00% (busy=8/elapsed=8 ticks; idle time is not modelled, so this is 100% by construction)
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

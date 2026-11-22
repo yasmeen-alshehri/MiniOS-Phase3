@@ -1,0 +1,7 @@
+# The hook fires once and the failed request consumes no PID, memory, or queue slot.
+debug fail-next-allocation
+task create F 2 128
+tasks
+memory
+check
+task create G 2 128

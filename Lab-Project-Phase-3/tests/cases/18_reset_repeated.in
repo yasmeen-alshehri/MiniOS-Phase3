@@ -1,0 +1,7 @@
+reset
+reset
+task create A 1 1
+run
+reset
+run
+check

@@ -1,0 +1,56 @@
+MiniOS for a Study Room | C11 Phase 2 prototype
+One simulated CPU | quantum=2 | payload budget=65536 bytes
+Type help for commands. Notes persist; task state starts fresh on restart.
+minios> quantum 8
+OK: quantum 8
+minios> task create CPU1 20 4096
+Created P1 CPU1: READY, burst=20, payload=4096 bytes
+minios> task create CPU2 16 4096
+Created P2 CPU2: READY, burst=16, payload=4096 bytes
+minios> task create Inter1 2 512
+Created P3 Inter1: READY, burst=2, payload=512 bytes
+minios> task create CPU3 18 4096
+Created P4 CPU3: READY, burst=18, payload=4096 bytes
+minios> task create Inter2 3 512
+Created P5 Inter2: READY, burst=3, payload=512 bytes
+minios> task create Inter3 1 512
+Created P6 Inter3: READY, burst=1, payload=512 bytes
+minios> task create CPU4 14 4096
+Created P7 CPU4: READY, burst=14, payload=4096 bytes
+minios> session start Inter4 2 512
+Created P8 Inter4: READY, burst=2, payload=512 bytes
+minios> run
+[0,8) P1 CPU1         RUNNING -> READY    remaining=12
+[8,16) P2 CPU2         RUNNING -> READY    remaining=8
+[16,18) P3 Inter1       RUNNING -> FINISHED remaining=0
+[18,26) P4 CPU3         RUNNING -> READY    remaining=10
+[26,29) P5 Inter2       RUNNING -> FINISHED remaining=0
+[29,30) P6 Inter3       RUNNING -> FINISHED remaining=0
+[30,38) P7 CPU4         RUNNING -> READY    remaining=6
+[38,40) P8 Inter4       RUNNING -> FINISHED remaining=0
+SESSION COMPLETE: P8 Inter4 at tick 40
+[40,48) P1 CPU1         RUNNING -> READY    remaining=4
+[48,56) P2 CPU2         RUNNING -> FINISHED remaining=0
+[56,64) P4 CPU3         RUNNING -> READY    remaining=2
+[64,70) P7 CPU4         RUNNING -> FINISHED remaining=0
+[70,74) P1 CPU1         RUNNING -> FINISHED remaining=0
+[74,76) P4 CPU3         RUNNING -> FINISHED remaining=0
+Run complete at tick 76: no READY or WAITING tasks remain.
+minios> metrics
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   CPU1             0   20    0     74   74   54   0    3
+2   CPU2             0   16    8     56   56   40   8    2
+3   Inter1           0   2     16    18   18   16   16   1
+4   CPU3             0   18    18    76   76   58   18   3
+5   Inter2           0   3     26    29   29   26   26   1
+6   Inter3           0   1     29    30   30   29   29   1
+7   CPU4             0   14    30    70   70   56   30   2
+8   Inter4           0   2     38    40   40   38   38   1
+Means (8 finished): turnaround=49.12 waiting=39.62 response=20.62 ticks
+Makespan=76 ticks [0,76) throughput=0.1053 tasks/tick
+Dispatches=14 (all tasks in this experiment)
+CPU utilization=100.00% (busy=76/elapsed=76 ticks; idle time is not modelled, so this is 100% by construction)
+minios> export
+OK: metrics.csv exported (finished tasks only).
+minios> quit
+Shutdown: used_bytes=0 allocations=0

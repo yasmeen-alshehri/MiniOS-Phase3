@@ -1,0 +1,15 @@
+OK: note create n
+ERROR: Cannot create note (check name, directory, permissions, or existing file).
+OK: note append n
+Finish  the OS project
+Second line
+OK: note read n
+ERROR: Cannot append: note is missing or unreadable.
+ERROR: Cannot read note: missing file or read failure.
+OK: note delete n
+ERROR: Cannot delete note: missing file or remove failure.
+ERROR: Note name must use 1..48 letters/digits/_/- (no path separators).
+ERROR: Invalid command or argument; enter help for syntax and limits.
+ERROR: Invalid command or argument; enter help for syntax and limits.
+ERROR: Invalid command or argument; enter help for syntax and limits.
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

@@ -1,0 +1,19 @@
+Created P1 Study: READY, burst=4, payload=256 bytes
+Created P2 Review: READY, burst=3, payload=128 bytes
+Created P3 Practice: READY, burst=2, payload=64 bytes
+[0,2) P1 Study        RUNNING -> READY    remaining=2
+[2,4) P2 Review       RUNNING -> READY    remaining=1
+[4,6) P3 Practice     RUNNING -> FINISHED remaining=0
+[6,8) P1 Study        RUNNING -> FINISHED remaining=0
+SESSION COMPLETE: P1 Study at tick 8
+[8,9) P2 Review       RUNNING -> FINISHED remaining=0
+Run complete at tick 9: no READY or WAITING tasks remain.
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   Study            0   4     0     8    8    4    0    2
+2   Review           0   3     2     9    9    6    2    2
+3   Practice         0   2     4     6    6    4    4    1
+Means (3 finished): turnaround=7.67 waiting=4.67 response=2.00 ticks
+Makespan=9 ticks [0,9) throughput=0.3333 tasks/tick
+Dispatches=5 (all tasks in this experiment)
+CPU utilization=100.00% (busy=9/elapsed=9 ticks; idle time is not modelled, so this is 100% by construction)
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

@@ -1,0 +1,7 @@
+Created P1 A: READY, burst=3, payload=500 bytes
+Created P2 B: READY, burst=1, payload=200 bytes
+OK: block 1
+[0,1) P2 B            RUNNING -> FINISHED remaining=0
+Run paused at tick 1: ready queue empty; 1 WAITING task(s) need wake.
+Memory: used=500/65536 bytes free=65036 allocations=1
+Shutdown: used_bytes=0 allocations=0 released_allocations=1 released_bytes=500

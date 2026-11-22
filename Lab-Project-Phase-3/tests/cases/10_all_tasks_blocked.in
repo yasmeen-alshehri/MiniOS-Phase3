@@ -1,0 +1,9 @@
+task create A 2 8
+task create B 2 8
+block 1
+block 2
+step
+run
+wake 2
+run
+check

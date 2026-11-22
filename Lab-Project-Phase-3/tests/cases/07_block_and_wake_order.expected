@@ -1,0 +1,20 @@
+Created P1 A: READY, burst=2, payload=10 bytes
+Created P2 B: READY, burst=2, payload=20 bytes
+Created P3 C: READY, burst=2, payload=30 bytes
+OK: block 2
+Tasks | tick=0 quantum=2 records=3/20
+PID NAME                 STATE     BURST LEFT ARRIVAL BYTES
+1   A                    READY     2     2    0       10
+2   B                    WAITING   2     2    0       20
+3   C                    READY     2     2    0       30
+Ready queue: P1 P3
+Memory: used=60/65536 bytes free=65476 allocations=3
+OK: wake 2
+Tasks | tick=0 quantum=2 records=3/20
+PID NAME                 STATE     BURST LEFT ARRIVAL BYTES
+1   A                    READY     2     2    0       10
+2   B                    READY     2     2    0       20
+3   C                    READY     2     2    0       30
+Ready queue: P1 P3 P2
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=3 released_bytes=60

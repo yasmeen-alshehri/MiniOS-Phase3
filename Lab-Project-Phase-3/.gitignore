@@ -1,0 +1,27 @@
+# Executables and test builds
+/minios
+/minios.exe
+/build/
+*.o
+
+# Runtime output (experiments/results/ is deliberately not ignored)
+/data/events.log
+/data/trace.csv
+/data/metrics.csv
+/data/gantt.png
+/data/notes/
+
+# Python
+/.venv/
+__pycache__/
+*.py[cod]
+
+# Debugger and Valgrind dumps
+vgcore.*
+
+# Editors and operating systems
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

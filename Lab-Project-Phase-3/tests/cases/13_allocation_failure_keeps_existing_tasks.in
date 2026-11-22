@@ -1,0 +1,7 @@
+task create A 2 100
+debug fail-next-allocation
+session start S 2 50
+tasks
+memory
+session start S 2 50
+check

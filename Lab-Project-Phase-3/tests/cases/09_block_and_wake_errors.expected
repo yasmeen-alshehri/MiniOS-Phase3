@@ -1,0 +1,16 @@
+ERROR: Only an existing READY task can be blocked.
+ERROR: Only an existing WAITING task can be woken.
+Created P1 A: READY, burst=1, payload=1 bytes
+ERROR: Only an existing WAITING task can be woken.
+OK: block 1
+ERROR: Only an existing READY task can be blocked.
+OK: wake 1
+ERROR: Only an existing WAITING task can be woken.
+[0,1) P1 A            RUNNING -> FINISHED remaining=0
+Run complete at tick 1: no READY or WAITING tasks remain.
+ERROR: Only an existing READY task can be blocked.
+ERROR: Only an existing WAITING task can be woken.
+ERROR: Invalid command or argument; enter help for syntax and limits.
+ERROR: Invalid command or argument; enter help for syntax and limits.
+CHECK PASS: queue, task states, and allocation ownership are consistent.
+Shutdown: used_bytes=0 allocations=0 released_allocations=0 released_bytes=0

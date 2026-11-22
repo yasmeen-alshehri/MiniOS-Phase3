@@ -1,0 +1,9 @@
+# B is READY for [0,2), blocked for [2,6), READY again for no time.
+task create A 6 1
+task create B 2 1
+step
+block 2
+run
+wake 2
+run
+metrics

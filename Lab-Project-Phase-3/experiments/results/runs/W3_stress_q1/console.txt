@@ -1,0 +1,278 @@
+MiniOS for a Study Room | C11 Phase 2 prototype
+One simulated CPU | quantum=2 | payload budget=65536 bytes
+Type help for commands. Notes persist; task state starts fresh on restart.
+minios> quantum 1
+OK: quantum 1
+minios> task create T1 13 2048
+Created P1 T1: READY, burst=13, payload=2048 bytes
+minios> task create T2 5 256
+Created P2 T2: READY, burst=5, payload=256 bytes
+minios> task create T3 32 3072
+Created P3 T3: READY, burst=32, payload=3072 bytes
+minios> task create T4 23 1024
+Created P4 T4: READY, burst=23, payload=1024 bytes
+minios> task create T5 8 3072
+Created P5 T5: READY, burst=8, payload=3072 bytes
+minios> task create T6 15 3072
+Created P6 T6: READY, burst=15, payload=3072 bytes
+minios> task create T7 13 2048
+Created P7 T7: READY, burst=13, payload=2048 bytes
+minios> task create T8 10 1024
+Created P8 T8: READY, burst=10, payload=1024 bytes
+minios> task create T9 1 256
+Created P9 T9: READY, burst=1, payload=256 bytes
+minios> task create T10 7 256
+Created P10 T10: READY, burst=7, payload=256 bytes
+minios> task create T11 9 2048
+Created P11 T11: READY, burst=9, payload=2048 bytes
+minios> task create T12 1 3072
+Created P12 T12: READY, burst=1, payload=3072 bytes
+minios> task create T13 36 3072
+Created P13 T13: READY, burst=36, payload=3072 bytes
+minios> task create T14 7 512
+Created P14 T14: READY, burst=7, payload=512 bytes
+minios> task create T15 8 3072
+Created P15 T15: READY, burst=8, payload=3072 bytes
+minios> task create T16 17 512
+Created P16 T16: READY, burst=17, payload=512 bytes
+minios> task create T17 30 2048
+Created P17 T17: READY, burst=30, payload=2048 bytes
+minios> task create T18 37 256
+Created P18 T18: READY, burst=37, payload=256 bytes
+minios> task create T19 19 256
+Created P19 T19: READY, burst=19, payload=256 bytes
+minios> task create T20 22 3072
+Created P20 T20: READY, burst=22, payload=3072 bytes
+minios> run
+[0,1) P1 T1           RUNNING -> READY    remaining=12
+[1,2) P2 T2           RUNNING -> READY    remaining=4
+[2,3) P3 T3           RUNNING -> READY    remaining=31
+[3,4) P4 T4           RUNNING -> READY    remaining=22
+[4,5) P5 T5           RUNNING -> READY    remaining=7
+[5,6) P6 T6           RUNNING -> READY    remaining=14
+[6,7) P7 T7           RUNNING -> READY    remaining=12
+[7,8) P8 T8           RUNNING -> READY    remaining=9
+[8,9) P9 T9           RUNNING -> FINISHED remaining=0
+[9,10) P10 T10          RUNNING -> READY    remaining=6
+[10,11) P11 T11          RUNNING -> READY    remaining=8
+[11,12) P12 T12          RUNNING -> FINISHED remaining=0
+[12,13) P13 T13          RUNNING -> READY    remaining=35
+[13,14) P14 T14          RUNNING -> READY    remaining=6
+[14,15) P15 T15          RUNNING -> READY    remaining=7
+[15,16) P16 T16          RUNNING -> READY    remaining=16
+[16,17) P17 T17          RUNNING -> READY    remaining=29
+[17,18) P18 T18          RUNNING -> READY    remaining=36
+[18,19) P19 T19          RUNNING -> READY    remaining=18
+[19,20) P20 T20          RUNNING -> READY    remaining=21
+[20,21) P1 T1           RUNNING -> READY    remaining=11
+[21,22) P2 T2           RUNNING -> READY    remaining=3
+[22,23) P3 T3           RUNNING -> READY    remaining=30
+[23,24) P4 T4           RUNNING -> READY    remaining=21
+[24,25) P5 T5           RUNNING -> READY    remaining=6
+[25,26) P6 T6           RUNNING -> READY    remaining=13
+[26,27) P7 T7           RUNNING -> READY    remaining=11
+[27,28) P8 T8           RUNNING -> READY    remaining=8
+[28,29) P10 T10          RUNNING -> READY    remaining=5
+[29,30) P11 T11          RUNNING -> READY    remaining=7
+[30,31) P13 T13          RUNNING -> READY    remaining=34
+[31,32) P14 T14          RUNNING -> READY    remaining=5
+[32,33) P15 T15          RUNNING -> READY    remaining=6
+[33,34) P16 T16          RUNNING -> READY    remaining=15
+[34,35) P17 T17          RUNNING -> READY    remaining=28
+[35,36) P18 T18          RUNNING -> READY    remaining=35
+[36,37) P19 T19          RUNNING -> READY    remaining=17
+[37,38) P20 T20          RUNNING -> READY    remaining=20
+[38,39) P1 T1           RUNNING -> READY    remaining=10
+[39,40) P2 T2           RUNNING -> READY    remaining=2
+[40,41) P3 T3           RUNNING -> READY    remaining=29
+[41,42) P4 T4           RUNNING -> READY    remaining=20
+[42,43) P5 T5           RUNNING -> READY    remaining=5
+[43,44) P6 T6           RUNNING -> READY    remaining=12
+[44,45) P7 T7           RUNNING -> READY    remaining=10
+[45,46) P8 T8           RUNNING -> READY    remaining=7
+[46,47) P10 T10          RUNNING -> READY    remaining=4
+[47,48) P11 T11          RUNNING -> READY    remaining=6
+[48,49) P13 T13          RUNNING -> READY    remaining=33
+[49,50) P14 T14          RUNNING -> READY    remaining=4
+[50,51) P15 T15          RUNNING -> READY    remaining=5
+[51,52) P16 T16          RUNNING -> READY    remaining=14
+[52,53) P17 T17          RUNNING -> READY    remaining=27
+[53,54) P18 T18          RUNNING -> READY    remaining=34
+[54,55) P19 T19          RUNNING -> READY    remaining=16
+[55,56) P20 T20          RUNNING -> READY    remaining=19
+[56,57) P1 T1           RUNNING -> READY    remaining=9
+[57,58) P2 T2           RUNNING -> READY    remaining=1
+[58,59) P3 T3           RUNNING -> READY    remaining=28
+[59,60) P4 T4           RUNNING -> READY    remaining=19
+[60,61) P5 T5           RUNNING -> READY    remaining=4
+[61,62) P6 T6           RUNNING -> READY    remaining=11
+[62,63) P7 T7           RUNNING -> READY    remaining=9
+[63,64) P8 T8           RUNNING -> READY    remaining=6
+[64,65) P10 T10          RUNNING -> READY    remaining=3
+[65,66) P11 T11          RUNNING -> READY    remaining=5
+[66,67) P13 T13          RUNNING -> READY    remaining=32
+[67,68) P14 T14          RUNNING -> READY    remaining=3
+[68,69) P15 T15          RUNNING -> READY    remaining=4
+[69,70) P16 T16          RUNNING -> READY    remaining=13
+[70,71) P17 T17          RUNNING -> READY    remaining=26
+[71,72) P18 T18          RUNNING -> READY    remaining=33
+[72,73) P19 T19          RUNNING -> READY    remaining=15
+[73,74) P20 T20          RUNNING -> READY    remaining=18
+[74,75) P1 T1           RUNNING -> READY    remaining=8
+[75,76) P2 T2           RUNNING -> FINISHED remaining=0
+[76,77) P3 T3           RUNNING -> READY    remaining=27
+[77,78) P4 T4           RUNNING -> READY    remaining=18
+[78,79) P5 T5           RUNNING -> READY    remaining=3
+[79,80) P6 T6           RUNNING -> READY    remaining=10
+[80,81) P7 T7           RUNNING -> READY    remaining=8
+[81,82) P8 T8           RUNNING -> READY    remaining=5
+[82,83) P10 T10          RUNNING -> READY    remaining=2
+[83,84) P11 T11          RUNNING -> READY    remaining=4
+[84,85) P13 T13          RUNNING -> READY    remaining=31
+[85,86) P14 T14          RUNNING -> READY    remaining=2
+[86,87) P15 T15          RUNNING -> READY    remaining=3
+[87,88) P16 T16          RUNNING -> READY    remaining=12
+[88,89) P17 T17          RUNNING -> READY    remaining=25
+[89,90) P18 T18          RUNNING -> READY    remaining=32
+[90,91) P19 T19          RUNNING -> READY    remaining=14
+[91,92) P20 T20          RUNNING -> READY    remaining=17
+[92,93) P1 T1           RUNNING -> READY    remaining=7
+[93,94) P3 T3           RUNNING -> READY    remaining=26
+[94,95) P4 T4           RUNNING -> READY    remaining=17
+[95,96) P5 T5           RUNNING -> READY    remaining=2
+[96,97) P6 T6           RUNNING -> READY    remaining=9
+[97,98) P7 T7           RUNNING -> READY    remaining=7
+[98,99) P8 T8           RUNNING -> READY    remaining=4
+[99,100) P10 T10          RUNNING -> READY    remaining=1
+[100,101) P11 T11          RUNNING -> READY    remaining=3
+[101,102) P13 T13          RUNNING -> READY    remaining=30
+[102,103) P14 T14          RUNNING -> READY    remaining=1
+[103,104) P15 T15          RUNNING -> READY    remaining=2
+[104,105) P16 T16          RUNNING -> READY    remaining=11
+[105,106) P17 T17          RUNNING -> READY    remaining=24
+[106,107) P18 T18          RUNNING -> READY    remaining=31
+[107,108) P19 T19          RUNNING -> READY    remaining=13
+[108,109) P20 T20          RUNNING -> READY    remaining=16
+[109,110) P1 T1           RUNNING -> READY    remaining=6
+[110,111) P3 T3           RUNNING -> READY    remaining=25
+[111,112) P4 T4           RUNNING -> READY    remaining=16
+[112,113) P5 T5           RUNNING -> READY    remaining=1
+[113,114) P6 T6           RUNNING -> READY    remaining=8
+[114,115) P7 T7           RUNNING -> READY    remaining=6
+[115,116) P8 T8           RUNNING -> READY    remaining=3
+[116,117) P10 T10          RUNNING -> FINISHED remaining=0
+[117,118) P11 T11          RUNNING -> READY    remaining=2
+[118,119) P13 T13          RUNNING -> READY    remaining=29
+[119,120) P14 T14          RUNNING -> FINISHED remaining=0
+[120,121) P15 T15          RUNNING -> READY    remaining=1
+[121,122) P16 T16          RUNNING -> READY    remaining=10
+[122,123) P17 T17          RUNNING -> READY    remaining=23
+[123,124) P18 T18          RUNNING -> READY    remaining=30
+[124,125) P19 T19          RUNNING -> READY    remaining=12
+[125,126) P20 T20          RUNNING -> READY    remaining=15
+[126,127) P1 T1           RUNNING -> READY    remaining=5
+[127,128) P3 T3           RUNNING -> READY    remaining=24
+[128,129) P4 T4           RUNNING -> READY    remaining=15
+[129,130) P5 T5           RUNNING -> FINISHED remaining=0
+[130,131) P6 T6           RUNNING -> READY    remaining=7
+[131,132) P7 T7           RUNNING -> READY    remaining=5
+[132,133) P8 T8           RUNNING -> READY    remaining=2
+[133,134) P11 T11          RUNNING -> READY    remaining=1
+[134,135) P13 T13          RUNNING -> READY    remaining=28
+[135,136) P15 T15          RUNNING -> FINISHED remaining=0
+[136,137) P16 T16          RUNNING -> READY    remaining=9
+[137,138) P17 T17          RUNNING -> READY    remaining=22
+[138,139) P18 T18          RUNNING -> READY    remaining=29
+[139,140) P19 T19          RUNNING -> READY    remaining=11
+[140,141) P20 T20          RUNNING -> READY    remaining=14
+[141,142) P1 T1           RUNNING -> READY    remaining=4
+[142,143) P3 T3           RUNNING -> READY    remaining=23
+[143,144) P4 T4           RUNNING -> READY    remaining=14
+[144,145) P6 T6           RUNNING -> READY    remaining=6
+[145,146) P7 T7           RUNNING -> READY    remaining=4
+[146,147) P8 T8           RUNNING -> READY    remaining=1
+[147,148) P11 T11          RUNNING -> FINISHED remaining=0
+[148,149) P13 T13          RUNNING -> READY    remaining=27
+[149,150) P16 T16          RUNNING -> READY    remaining=8
+[150,151) P17 T17          RUNNING -> READY    remaining=21
+[151,152) P18 T18          RUNNING -> READY    remaining=28
+[152,153) P19 T19          RUNNING -> READY    remaining=10
+[153,154) P20 T20          RUNNING -> READY    remaining=13
+[154,155) P1 T1           RUNNING -> READY    remaining=3
+[155,156) P3 T3           RUNNING -> READY    remaining=22
+[156,157) P4 T4           RUNNING -> READY    remaining=13
+[157,158) P6 T6           RUNNING -> READY    remaining=5
+[158,159) P7 T7           RUNNING -> READY    remaining=3
+[159,160) P8 T8           RUNNING -> FINISHED remaining=0
+[160,161) P13 T13          RUNNING -> READY    remaining=26
+[161,162) P16 T16          RUNNING -> READY    remaining=7
+[162,163) P17 T17          RUNNING -> READY    remaining=20
+[163,164) P18 T18          RUNNING -> READY    remaining=27
+[164,165) P19 T19          RUNNING -> READY    remaining=9
+[165,166) P20 T20          RUNNING -> READY    remaining=12
+[166,167) P1 T1           RUNNING -> READY    remaining=2
+[167,168) P3 T3           RUNNING -> READY    remaining=21
+[168,169) P4 T4           RUNNING -> READY    remaining=12
+[169,170) P6 T6           RUNNING -> READY    remaining=4
+[170,171) P7 T7           RUNNING -> READY    remaining=2
+[171,172) P13 T13          RUNNING -> READY    remaining=25
+[172,173) P16 T16          RUNNING -> READY    remaining=6
+[173,174) P17 T17          RUNNING -> READY    remaining=19
+[174,175) P18 T18          RUNNING -> READY    remaining=26
+[175,176) P19 T19          RUNNING -> READY    remaining=8
+[176,177) P20 T20          RUNNING -> READY    remaining=11
+[177,178) P1 T1           RUNNING -> READY    remaining=1
+[178,179) P3 T3           RUNNING -> READY    remaining=20
+[179,180) P4 T4           RUNNING -> READY    remaining=11
+[180,181) P6 T6           RUNNING -> READY    remaining=3
+[181,182) P7 T7           RUNNING -> READY    remaining=1
+[182,183) P13 T13          RUNNING -> READY    remaining=24
+[183,184) P16 T16          RUNNING -> READY    remaining=5
+[184,185) P17 T17          RUNNING -> READY    remaining=18
+[185,186) P18 T18          RUNNING -> READY    remaining=25
+[186,187) P19 T19          RUNNING -> READY    remaining=7
+[187,188) P20 T20          RUNNING -> READY    remaining=10
+[188,189) P1 T1           RUNNING -> FINISHED remaining=0
+[189,190) P3 T3           RUNNING -> READY    remaining=19
+[190,191) P4 T4           RUNNING -> READY    remaining=10
+[191,192) P6 T6           RUNNING -> READY    remaining=2
+[192,193) P7 T7           RUNNING -> FINISHED remaining=0
+[193,194) P13 T13          RUNNING -> READY    remaining=23
+[194,195) P16 T16          RUNNING -> READY    remaining=4
+[195,196) P17 T17          RUNNING -> READY    remaining=17
+[196,197) P18 T18          RUNNING -> READY    remaining=24
+[197,198) P19 T19          RUNNING -> READY    remaining=6
+[198,199) P20 T20          RUNNING -> READY    remaining=9
+[199,200) P3 T3           RUNNING -> READY    remaining=18
+... 113 further slice(s) not shown; full record in temporary trace.csv
+Run complete at tick 313: no READY or WAITING tasks remain.
+minios> metrics
+PID NAME             ARR BURST FIRST DONE TURN WAIT RESP DISP
+1   T1               0   13    0     189  189  176  0    13
+2   T2               0   5     1     76   76   71   1    5
+3   T3               0   32    2     302  302  270  2    32
+4   T4               0   23    3     267  267  244  3    23
+5   T5               0   8     4     130  130  122  4    8
+6   T6               0   15    5     211  211  196  5    15
+7   T7               0   13    6     193  193  180  6    13
+8   T8               0   10    7     160  160  150  7    10
+9   T9               0   1     8     9    9    8    8    1
+10  T10              0   7     9     117  117  110  9    7
+11  T11              0   9     10    148  148  139  10   9
+12  T12              0   1     11    12   12   11   11   1
+13  T13              0   36    12    311  311  275  12   36
+14  T14              0   7     13    120  120  113  13   7
+15  T15              0   8     14    136  136  128  14   8
+16  T16              0   17    15    229  229  212  15   17
+17  T17              0   30    16    297  297  267  16   30
+18  T18              0   37    17    313  313  276  17   37
+19  T19              0   19    18    246  246  227  18   19
+20  T20              0   22    19    265  265  243  19   22
+Means (20 finished): turnaround=186.55 waiting=170.90 response=9.50 ticks
+Makespan=313 ticks [0,313) throughput=0.0639 tasks/tick
+Dispatches=313 (all tasks in this experiment)
+CPU utilization=100.00% (busy=313/elapsed=313 ticks; idle time is not modelled, so this is 100% by construction)
+minios> export
+OK: metrics.csv exported (finished tasks only).
+minios> quit
+Shutdown: used_bytes=0 allocations=0
