@@ -66,13 +66,23 @@ bool queue_remove(ReadyQueue *queue, int pid) {
 #define RUN_ECHO_LIMIT 200
 
 /**
+ * Count a trace failure for the exit status; warn only the first time per kind,
+ * because a long run could otherwise repeat the same warning many thousands of times.
+ */
+static void trace_failure(App *app, bool *warned, const char *message) {
+    ++app->logger.failures;
+    if (!*warned) {
+        *warned = true;
+        fprintf(stderr, "%s Further failures of this kind are not reported.\n", message);
+    }
+}
+
+/**
  * Flush the trace once and count a detected failure.
  */
 static void trace_flush(App *app) {
-    if (app->trace && fflush(app->trace) != 0) {
-        ++app->logger.failures;
-        fprintf(stderr, "WARNING: scheduling trace flush failed.\n");
-    }
+    if (app->trace && fflush(app->trace) != 0)
+        trace_failure(app, &app->trace_flush_warned, "WARNING: scheduling trace flush failed.");
 }
 
 /**
@@ -128,7 +138,7 @@ static bool dispatch_slice(App *app, FILE *out, bool echo) {
     }
     /* 5. Persist the observed slice and then check for session completion. */
     if (echo)
-        fprintf(out, "[%lld,%lld) P%d %-12.12s RUNNING -> %-8s remaining=%d\n",
+        fprintf(out, "[%lld,%lld) P%d %-12s RUNNING -> %-8s remaining=%d\n",
                 start, app->now, pid, task->name, state_name(task->state), task->remaining);
     if (echo || task->state == FINISHED) {
         snprintf(detail, sizeof detail, "start=%lld end=%lld remaining=%d state=%s used_bytes=%zu",
@@ -137,10 +147,8 @@ static bool dispatch_slice(App *app, FILE *out, bool echo) {
     }
     if (app->trace &&
         fprintf(app->trace, "%d,%d,%lld,%lld,%d,%s\n", app->experiment, pid, start,
-                app->now, task->remaining, state_name(task->state)) < 0) {
-        ++app->logger.failures;
-        fprintf(stderr, "WARNING: scheduling trace write failed.\n");
-    }
+                app->now, task->remaining, state_name(task->state)) < 0)
+        trace_failure(app, &app->trace_write_warned, "WARNING: scheduling trace write failed.");
     if (echo)
         trace_flush(app);
     session_complete(app, task, out);
@@ -236,7 +244,7 @@ void metrics_print(const App *app, FILE *out, bool csv) {
                     t->arrival, t->burst, t->first_run, t->completion, turnaround, t->ready_wait,
                     response, t->dispatches);
         else
-            fprintf(out, "%-3d %-16.16s %-3lld %-5d %-5lld %-4lld %-4lld %-4lld %-4lld %d\n",
+            fprintf(out, "%-3d %-16s %-3lld %-5d %-5lld %-4lld %-4lld %-4lld %-4lld %d\n",
                     t->pid, t->name, t->arrival, t->burst, t->first_run, t->completion,
                     turnaround, t->ready_wait, response, t->dispatches);
         if (completed == 0 || t->arrival < first_arrival)

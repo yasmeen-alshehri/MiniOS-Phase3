@@ -9,6 +9,7 @@
 #include "core.h"
 #include "shell.h"
 
+#include <signal.h>
 #include <string.h>
 
 /**
@@ -31,6 +32,11 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
+#ifdef SIGPIPE
+    /* A closed output pipe becomes a write error that the shell reports after
+     * cleanup, instead of a signal that ends the program before cleanup. */
+    signal(SIGPIPE, SIG_IGN);
+#endif
     /* Quantum 2 matches the reference experiment from the proposal. */
     if (!app_init(&app, directory, 2)) {
         fprintf(stderr, "ERROR: %s\n", app.error);

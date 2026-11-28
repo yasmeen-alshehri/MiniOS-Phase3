@@ -160,8 +160,11 @@ static int execute(App *app, char *line) {
             return 2;
         else if (!strcmp(cmd, "tasks"))
             tasks_print(app, stdout);
-        else if (!strcmp(cmd, "step"))
-            (void)scheduler_step(app, stdout);
+        else if (!strcmp(cmd, "step")) {
+            /* An idle CPU is not an error; a failed dispatch explains itself in app->error. */
+            if (!scheduler_step(app, stdout) && app->error[0])
+                okay = false;
+        }
         else if (!strcmp(cmd, "run"))
             scheduler_run(app, stdout);
         else if (!strcmp(cmd, "metrics"))
@@ -204,9 +207,10 @@ syntax:
  * Read one whole input line, byte by byte, up to and excluding its newline.
  * Unlike fgets + strlen, this never stops at a NUL byte, so the complete line is
  * always consumed and none of it can be read again as a separate command.
- * Store at most size - 2 content bytes (2,046, as before) and set *too_long when
- * more arrive; set *nul when any byte is NUL. Return false at EOF before any byte
- * or on a read error, where a partial line is not executed.
+ * Allow size - 2 content bytes (2,046) plus one final CR, so the limit is the same
+ * for LF and CRLF input; set *too_long when more arrive. Set *nul when any byte
+ * is NUL. Return false at EOF before any byte or on a read error, where a partial
+ * line is not executed.
  */
 static bool read_line(char *line, size_t size, bool *too_long, bool *nul) {
     size_t length = 0;
@@ -219,11 +223,14 @@ static bool read_line(char *line, size_t size, bool *too_long, bool *nul) {
             break;
         if (ch == '\0')
             *nul = true;
-        if (length < size - 2)
+        if (length < size - 1)
             line[length++] = (char)ch;
         else
             *too_long = true;
     }
+    /* The one byte beyond the content limit is accepted only as the line's final CR. */
+    if (length == size - 1 && line[length - 1] != '\r')
+        *too_long = true;
     line[length] = '\0';
     return any && !ferror(stdin);
 }
@@ -244,6 +251,9 @@ int shell_run(App *app, bool interactive) {
         size_t length;
         int status;
         bool too_long, nul;
+        /* Output can no longer be delivered, so stop taking commands; reported below. */
+        if (ferror(stdout))
+            break;
         if (interactive) {
             fputs("minios> ", stdout);
             fflush(stdout);
@@ -288,5 +298,10 @@ int shell_run(App *app, bool interactive) {
     printf("Shutdown: used_bytes=%zu allocations=%zu released_allocations=%zu released_bytes=%zu\n",
            app->memory.used, app->memory.count, count - app->memory.count,
            bytes - app->memory.used);
+    /* Buffered output may fail only when flushed, so check it before choosing the status. */
+    if (fflush(stdout) != 0 || ferror(stdout)) {
+        fputs("ERROR: standard output write failed.\n", stderr);
+        result = 1;
+    }
     return result || app->logger.failures ? 1 : 0;
 }

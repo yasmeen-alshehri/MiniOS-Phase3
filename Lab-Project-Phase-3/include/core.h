@@ -76,6 +76,8 @@ typedef struct {
     Memory memory;
     Logger logger;
     FILE *trace;         /* Owned scheduling CSV stream, closed at shutdown. */
+    /* Each kind of trace failure is warned about once per launch, but always counted. */
+    bool trace_write_warned, trace_flush_warned;
     /* Runtime directory and the most recent service error shown by the shell. */
     char data_dir[PATH_SIZE], error[ERROR_SIZE];
 } App;

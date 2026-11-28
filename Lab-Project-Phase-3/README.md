@@ -96,7 +96,7 @@ mkdir -p data/notes
 ./minios --data-dir OTHER_DIRECTORY               # use another existing directory
 ```
 
-The exit status is 1 for a startup, input, log/trace, or invariant failure. A
+The exit status is 1 for a startup, input, output, log/trace, or invariant failure. A
 rejected command prints `ERROR:` but does not change the exit status.
 
 ## Commands
@@ -123,8 +123,9 @@ Names use 1-48 ASCII letters, digits, underscores, or hyphens. Bursts and quantu
 are positive integers up to 1,000,000. Task records are limited to 20, including
 finished records until reset. Each payload is 1-65,536 bytes, subject to the total
 65,536-byte budget. Time is measured in virtual ticks. Note text can contain spaces.
-An input line holds at most 2,046 bytes. A longer line, or a line containing a
-NUL byte, is rejected and discarded whole; no part of it runs as a command.
+An input line holds at most 2,046 bytes, not counting its LF or CRLF line
+ending. A longer line, or a line containing a NUL byte, is rejected and
+discarded whole; no part of it runs as a command.
 
 `run` prints its first 200 slices and summarizes the rest. `trace.csv` always
 records every slice.
@@ -263,7 +264,9 @@ diff --strip-trailing-cr experiments/results/quantum_results.csv build/experimen
 ```
 
 No `diff` output means the results are identical. Without `--out`, the script
-replaces the files in `experiments/results/`.
+replaces the files in `experiments/results/`, but only after every run has
+passed its checks. It refuses a binary that does not print the Phase 3 banner;
+if `make` reports `minios` up to date but the script rejects it, use `make -B minios`.
 
 ### Gantt charts
 
@@ -304,8 +307,5 @@ out of the submission ZIP.
   placement, fragmentation, or paging.
 - `trace.csv` is unbounded: about 690 MB in the worst case (20 tasks of
   1,000,000 ticks at quantum 1).
-- A failed write to standard output is not reflected in the exit status.
-- When the trace cannot be written during a long run, the warning can repeat
-  many times.
 - Two instances must not share a data directory. On case-insensitive file
   systems such as `/mnt/c`, note names that differ only in case are the same note.

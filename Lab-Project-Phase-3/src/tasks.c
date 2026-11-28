@@ -119,7 +119,7 @@ void tasks_print(const App *app, FILE *out) {
     fprintf(out, "PID NAME                 STATE     BURST LEFT ARRIVAL BYTES\n");
     for (i = 0; i < app->task_count; ++i) {
         const Task *t = &app->tasks[i];
-        fprintf(out, "%-3d %-20.20s %-9s %-5d %-4d %-7lld %zu\n", t->pid, t->name,
+        fprintf(out, "%-3d %-20s %-9s %-5d %-4d %-7lld %zu\n", t->pid, t->name,
                 state_name(t->state), t->burst, t->remaining, t->arrival, t->payload_bytes);
     }
     /* Display logical FIFO order, including when storage wraps around. */

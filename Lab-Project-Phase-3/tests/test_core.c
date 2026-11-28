@@ -7,6 +7,7 @@
  *
  *   test_core DATA_DIR                   run the tests
  *   test_core DATA_DIR --shutdown-probe  shut down with deliberately drifted totals
+ *   test_core DATA_DIR --queue-probe     run commands with an invalid ready-queue entry
  */
 
 #include "core.h"
@@ -375,7 +376,7 @@ static void test_shutdown(void) {
 
 int main(int argc, char **argv) {
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "Usage: %s DATA_DIR [--shutdown-probe]\n", argv[0]);
+        fprintf(stderr, "Usage: %s DATA_DIR [--shutdown-probe | --queue-probe]\n", argv[0]);
         return 2;
     }
     directory = argv[1];
@@ -384,11 +385,16 @@ int main(int argc, char **argv) {
 
     if (argc == 3) {
         App app;
-        require(!strcmp(argv[2], "--shutdown-probe"), "known option");
+        bool queue_probe = !strcmp(argv[2], "--queue-probe");
+        require(queue_probe || !strcmp(argv[2], "--shutdown-probe"), "known option");
         fixture(&app);
         fclose(sink);
-        app.memory.used += 7;
-        ++app.memory.count;
+        if (queue_probe)
+            app.queue.ids[app.queue.head] = 17; /* the next dispatch meets an unknown PID */
+        else {
+            app.memory.used += 7;
+            ++app.memory.count;
+        }
         return shell_run(&app, false);
     }
     test_check_valid_states();

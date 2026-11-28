@@ -38,6 +38,7 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FCFS_QUANTUM = 1000000  # MAX_TICKS: >= every allowed burst, so RR degenerates to FCFS
 DEFAULT_QUANTA = "1,2,4,8,fcfs"
+BANNER = "MiniOS for a Study Room | C11 Phase 3"  # first line printed by the current program
 
 MEANS_RE = re.compile(r"Means \((\d+) finished\): turnaround=([\d.]+) waiting=([\d.]+) response=([\d.]+) ticks")
 MAKESPAN_RE = re.compile(r"Makespan=(\d+) ticks \[(\d+),(\d+)\) throughput=([\d.]+) tasks/tick")
@@ -60,6 +61,26 @@ def parse_quanta(text):
         else:
             raise argparse.ArgumentTypeError(f"invalid quantum {item!r}")
     return quanta
+
+
+def version_error(binary):
+    """Return why binary is not the current Phase 3 program, or None if it is.
+
+    A stale build (for example an older ./minios that make did not replace) would
+    otherwise produce results that fail validation with an unclear message.
+    """
+    try:
+        with tempfile.TemporaryDirectory(prefix="minios-version-") as data_dir:
+            result = subprocess.run([binary, "--batch", "--data-dir", data_dir], input="",
+                                    capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as error:
+        return f"cannot run {binary}: {error}"
+    first = result.stdout.splitlines()[:1]
+    if result.returncode != 0 or first != [BANNER]:
+        found = first[0] if first else "no output"
+        return (f"{binary} is not a current MiniOS Phase 3 build (it printed: {found!r}). "
+                "Rebuild it with 'make -B minios', or pass --binary.")
+    return None
 
 
 def default_binary():
@@ -252,6 +273,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not os.path.isfile(args.binary):
         print(f"ERROR: MiniOS binary not found: {args.binary} (build it with make)", file=sys.stderr)
+        return 1
+    problem = version_error(args.binary)
+    if problem:
+        print(f"ERROR: {problem}", file=sys.stderr)
         return 1
     workloads = sorted(f for f in os.listdir(args.workloads) if f.endswith(".txt")) \
         if os.path.isdir(args.workloads) else []

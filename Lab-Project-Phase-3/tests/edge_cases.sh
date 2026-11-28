@@ -164,6 +164,27 @@ test_line_of_2047_bytes_discarded() {
     has 'ERROR: Cannot read note'
 }
 
+test_crlf_line_of_2046_bytes_accepted() {
+    local prefix='note create x '
+    printf '%s\r\n' "$prefix$(repeat $((2046 - ${#prefix})) a)" | batch 0
+    empty "$CASE/err"
+    line 'OK: note create x'
+}
+
+test_crlf_line_of_2047_bytes_discarded() {
+    local prefix='note create x '
+    printf '%s\r\nnote read x\r\n' "$prefix$(repeat $((2047 - ${#prefix})) a)" | batch 0
+    line "$TOO_LONG"
+    has 'ERROR: Cannot read note'
+}
+
+test_only_one_final_cr_is_free() {
+    local prefix='note create x '
+    printf '%s\r\r\n' "$prefix$(repeat $((2046 - ${#prefix})) a)" | batch 0
+    line "$TOO_LONG"
+    lacks 'OK: note create'
+}
+
 test_oversized_line_tail_never_executes() {
     script "$(repeat 2047 a)task create Tail 1 1" tasks
     line "$TOO_LONG"
@@ -349,6 +370,35 @@ test_echo_limit_restarts_for_each_run() {
     lacks 'further slice'
 }
 
+test_long_task_name_shown_in_full() {
+    local name
+    name="$(repeat 41 n)_suffix" # 48 characters, the maximum
+    script "task create $name 1 1" tasks run metrics
+    has "1   $name READY"
+    has "P1 $name RUNNING -> FINISHED"
+    has "1   $name 0 "
+}
+
+# Exact rows: a 13-character name is one past the narrowest (12-character) column and
+# must appear whole, while a short name keeps the original padding in every table.
+test_task_name_over_12_characters_keeps_table_format() {
+    script 'task create Short 1 1' 'task create ThirteenChars 1 1' tasks run metrics
+    line "1   Short$(repeat 16 ' ')READY$(repeat 5 ' ')1$(repeat 5 ' ')1$(repeat 4 ' ')0$(repeat 7 ' ')1"
+    line "2   ThirteenChars$(repeat 8 ' ')READY$(repeat 5 ' ')1$(repeat 5 ' ')1$(repeat 4 ' ')0$(repeat 7 ' ')1"
+    line "[0,1) P1 Short$(repeat 8 ' ')RUNNING -> FINISHED remaining=0"
+    line '[1,2) P2 ThirteenChars RUNNING -> FINISHED remaining=0'
+    line "1   Short$(repeat 12 ' ')0$(repeat 3 ' ')1$(repeat 5 ' ')0$(repeat 5 ' ')1$(repeat 4 ' ')1$(repeat 4 ' ')0$(repeat 4 ' ')0$(repeat 4 ' ')1"
+    line "2   ThirteenChars$(repeat 4 ' ')0$(repeat 3 ' ')1$(repeat 5 ' ')1$(repeat 5 ' ')2$(repeat 4 ' ')2$(repeat 4 ' ')1$(repeat 4 ' ')1$(repeat 4 ' ')1"
+}
+
+test_step_reports_scheduler_error() {
+    local status=0
+    echo step | "$UNIT" "$DATA" --queue-probe > "$CASE/out" 2> "$CASE/err" || status=$?
+    same 1 "$status"
+    line 'ERROR: Invalid scheduler queue entry.'
+    has 'FATAL: internal invariant failed.' "$CASE/err"
+}
+
 test_step_is_never_hidden() {
     { echo 'task create A 250 1'; echo 'quantum 1'; for _ in {1..250}; do echo step; done; } | batch 0
     times 250 '^\['
@@ -456,6 +506,37 @@ test_trace_flush_failure_detected() {
     has 'WARNING: scheduling trace flush failed.'
 }
 
+test_trace_write_failure_warned_once() {
+    local status=0
+    ln -s /dev/null "$DATA/events.log"
+    # About 400 KiB of trace against an 8 KiB limit fails on every buffer flush.
+    printf 'task create A 20000 1\nquantum 1\nrun\nquit\n' |
+        (trap '' XFSZ; ulimit -f 8; exec "$MINIOS" --batch --data-dir "$DATA") > /dev/null 2> "$CASE/err" ||
+        status=$?
+    same 1 "$status"
+    times 1 'WARNING: scheduling trace write failed' "$CASE/err"
+}
+
+test_stdout_write_failure_sets_exit_status() {
+    local status=0
+    printf 'help\ntask create A 3 10\nrun\nquit\n' |
+        "$MINIOS" --batch --data-dir "$DATA" > /dev/full 2> "$CASE/err" || status=$?
+    same 1 "$status"
+    has 'ERROR: standard output write failed.' "$CASE/err"
+    has 'event=SHUTDOWN' "$DATA/events.log"
+}
+
+test_closed_output_pipe_is_reported_after_cleanup() {
+    # About 350 KiB of output overfills the pipe after head has already exited.
+    { for _ in {1..1000}; do echo help; done; } |
+        { status=0; "$MINIOS" --batch --data-dir "$DATA" 2> "$CASE/err" || status=$?
+          echo "$status" > "$CASE/status"; } |
+        head -c 10 > /dev/null || true
+    same 1 "$(cat "$CASE/status")"
+    has 'ERROR: standard output write failed.' "$CASE/err"
+    has 'event=SHUTDOWN' "$DATA/events.log"
+}
+
 test_export_write_failure_reported() {
     ln -s /dev/full "$DATA/metrics.csv"
     script export
@@ -519,10 +600,10 @@ experiment_fixture() {
     done
 }
 
-# experiments EXIT_STATUS: run the script on $CASE/workloads with quantum 1 into $CASE/results.
+# experiments EXIT_STATUS [BINARY]: run the script on $CASE/workloads with quantum 1 into $CASE/results.
 experiments() {
     local status=0
-    python3 -B "$ROOT/scripts/run_quantum_experiments.py" --binary "$MINIOS" --quanta 1 \
+    python3 -B "$ROOT/scripts/run_quantum_experiments.py" --binary "${2:-$MINIOS}" --quanta 1 \
         --workloads "$CASE/workloads" --out "$CASE/results" > "$CASE/out" 2> "$CASE/err" || status=$?
     same "$1" "$status"
 }
@@ -541,6 +622,17 @@ test_experiment_failure_keeps_existing_results() {
     experiments 1
     has 'ERROR: B_bad q1: 1 tasks created but 0 finished' "$CASE/err"
     # Neither the failed run nor the earlier valid run has replaced anything.
+    same "$before" "$(results_snapshot)"
+}
+
+test_experiment_rejects_stale_binary() {
+    local before
+    experiment_fixture
+    printf '#!/bin/sh\necho "MiniOS for a Study Room | C11 Phase 2 prototype"\n' > "$CASE/old-minios"
+    chmod +x "$CASE/old-minios"
+    before=$(results_snapshot)
+    experiments 1 "$CASE/old-minios"
+    has 'is not a current MiniOS Phase 3 build' "$CASE/err"
     same "$before" "$(results_snapshot)"
 }
 
