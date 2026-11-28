@@ -14,7 +14,8 @@ runs the real MiniOS binary in batch mode with a fresh temporary data directory:
 It then computes each metric independently from the exported metrics.csv and
 trace.csv, and cross-checks the values against the simulator's own `metrics`
 output. Any disagreement, rejected command, or unfinished task aborts the run,
-so a reported number is never taken from one source alone.
+so a reported number is never taken from one source alone. Nothing in the output
+directory is created or replaced unless every run passes these checks.
 
 Outputs (in --out, default experiments/results/):
     quantum_results.csv            one row per workload x quantum
@@ -30,7 +31,6 @@ import argparse
 import csv
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -111,11 +111,11 @@ def run_once(binary, workload, label, quantum, keep_dir):
             tasks = list(csv.DictReader(stream))
         with open(os.path.join(data_dir, "trace.csv"), newline="") as stream:
             trace = list(csv.DictReader(stream))
-        os.makedirs(keep_dir, exist_ok=True)
+        # Keep the raw files in memory; main() saves them only after every run is validated.
+        files = {}
         for name in ("metrics.csv", "trace.csv"):
-            shutil.copyfile(os.path.join(data_dir, name), os.path.join(keep_dir, name))
-        with open(os.path.join(keep_dir, "console.txt"), "w", encoding="utf-8") as stream:
-            stream.write(output)
+            with open(os.path.join(data_dir, name), "rb") as stream:
+                files[name] = stream.read()
 
     created = sum(1 for c in commands if c.startswith(("task create", "session start")))
     if len(tasks) != created:
@@ -178,7 +178,17 @@ def run_once(binary, workload, label, quantum, keep_dir):
                        "mean_turnaround": mean([t["turnaround"] for t in group]),
                        "mean_response": mean([t["response"] for t in group])}
                 for name, group in classes.items()}
-    return row, by_class
+    return row, by_class, (keep_dir, files, output)
+
+
+def save_run(keep_dir, files, output):
+    """Write one validated run: the simulator's CSV files byte for byte, and its console output."""
+    os.makedirs(keep_dir, exist_ok=True)
+    for name, data in files.items():
+        with open(os.path.join(keep_dir, name), "wb") as stream:
+            stream.write(data)
+    with open(os.path.join(keep_dir, "console.txt"), "w", encoding="utf-8") as stream:
+        stream.write(output)
 
 
 FIELDS = ["workload", "policy", "quantum", "tasks", "mean_waiting", "mean_turnaround", "mean_response",
@@ -248,27 +258,35 @@ def main(argv=None):
     if not workloads:
         print(f"ERROR: no workload .txt files in {args.workloads}", file=sys.stderr)
         return 1
-    os.makedirs(args.out, exist_ok=True)
-    rows, class_rows = [], []
+    rows, class_rows, pending = [], [], []
     for file_name in workloads:
         workload = os.path.splitext(file_name)[0]
         for label, quantum in args.quanta:
             keep = os.path.join(args.out, "runs", f"{workload}_{label}")
             try:
-                row, by_class = run_once(args.binary, os.path.join(args.workloads, file_name),
-                                         label, quantum, keep)
+                row, by_class, saved = run_once(args.binary, os.path.join(args.workloads, file_name),
+                                                label, quantum, keep)
             except (ExperimentError, OSError, subprocess.SubprocessError, ValueError, KeyError) as error:
                 print(f"ERROR: {workload} {label}: {error}", file=sys.stderr)
                 return 1
             row.update(workload=workload, policy=label if label == "FCFS" else f"RR {label}", quantum=quantum)
             rows.append(row)
+            pending.append(saved)
             for name, values in sorted(by_class.items()):
                 class_rows.append(dict(values, workload=workload, policy=row["policy"], quantum=quantum,
                                        **{"class": name}))
             print(f"{workload:12} {row['policy']:6} wait={row['mean_waiting']:7.2f} "
                   f"turn={row['mean_turnaround']:7.2f} resp={row['mean_response']:6.2f} "
                   f"disp={row['dispatches']:4} makespan={row['makespan']} [cross-check OK]")
-    write_outputs(args.out, rows, class_rows)
+    # Every run passed, so only now is anything in --out created or replaced.
+    try:
+        os.makedirs(args.out, exist_ok=True)
+        for keep, files, output in pending:
+            save_run(keep, files, output)
+        write_outputs(args.out, rows, class_rows)
+    except OSError as error:
+        print(f"ERROR: cannot write results to {args.out}: {error}", file=sys.stderr)
+        return 1
     print(f"Wrote results to {args.out}")
     return 0
 

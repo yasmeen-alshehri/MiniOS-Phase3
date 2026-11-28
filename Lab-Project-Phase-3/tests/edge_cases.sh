@@ -504,3 +504,58 @@ test_gantt_rejects_oversized_field() {
     { echo experiment,pid,start,end,remaining,state; repeat 140000 a; echo; } > "$CASE/trace.csv"
     gantt_rejects "$CASE/trace.csv"
 }
+
+# ---- Experiment script: results are saved only after every run is validated ----
+
+# A one-task workload, and a results folder already holding placeholder results.
+experiment_fixture() {
+    local file
+    mkdir -p "$CASE/workloads" "$CASE/results/runs/A_good_q1" "$CASE/results/runs/B_bad_q1"
+    echo 'task create X 3 10' > "$CASE/workloads/A_good.txt"
+    for file in runs/A_good_q1/trace.csv runs/A_good_q1/metrics.csv runs/A_good_q1/console.txt \
+                runs/B_bad_q1/trace.csv runs/B_bad_q1/metrics.csv runs/B_bad_q1/console.txt \
+                quantum_results.csv quantum_results_by_class.csv quantum_results.md; do
+        echo placeholder > "$CASE/results/$file"
+    done
+}
+
+# experiments EXIT_STATUS: run the script on $CASE/workloads with quantum 1 into $CASE/results.
+experiments() {
+    local status=0
+    python3 -B "$ROOT/scripts/run_quantum_experiments.py" --binary "$MINIOS" --quanta 1 \
+        --workloads "$CASE/workloads" --out "$CASE/results" > "$CASE/out" 2> "$CASE/err" || status=$?
+    same "$1" "$status"
+}
+
+results_snapshot() {
+    (cd "$CASE/results" && find . -type f -print0 | sort -z | xargs -0 sha256sum)
+}
+
+test_experiment_failure_keeps_existing_results() {
+    local before
+    experiment_fixture
+    # A blocked task never finishes. The simulator itself succeeds, so this is caught
+    # only by the script's own validation, after the point where results used to be copied.
+    printf 'task create Y 3 10\nblock 1\n' > "$CASE/workloads/B_bad.txt"
+    before=$(results_snapshot)
+    experiments 1
+    has 'ERROR: B_bad q1: 1 tasks created but 0 finished' "$CASE/err"
+    # Neither the failed run nor the earlier valid run has replaced anything.
+    same "$before" "$(results_snapshot)"
+}
+
+test_experiment_success_saves_results() {
+    local run=$CASE/results/runs/A_good_q1
+    experiment_fixture
+    experiments 0
+    same $'experiment,pid,start,end,remaining,state\n1,1,0,1,2,READY\n1,1,1,2,1,READY\n1,1,2,3,0,FINISHED' \
+         "$(cat "$run/trace.csv")"
+    same $'pid,name,arrival,burst,first_run,completion,turnaround,waiting,response,dispatches\n1,X,0,3,0,3,3,0,0,3' \
+         "$(cat "$run/metrics.csv")"
+    has 'Run complete at tick 3: no READY or WAITING tasks remain.' "$run/console.txt"
+    has 'A_good,RR q1,1,1,0.00,3.00,0.00,0,3,3,0.3333,100.00' "$CASE/results/quantum_results.csv"
+    has 'A_good,RR q1,1,X,1,0.00,3.00,0.00' "$CASE/results/quantum_results_by_class.csv"
+    has '| RR q1 | 0.00 | 3.00 | 0.00 | 0 | 3 | 3 | 0.3333 |' "$CASE/results/quantum_results.md"
+    lacks placeholder "$run/trace.csv"
+    has placeholder "$CASE/results/runs/B_bad_q1/trace.csv"
+}
