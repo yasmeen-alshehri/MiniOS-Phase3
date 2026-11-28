@@ -123,7 +123,8 @@ Names use 1-48 ASCII letters, digits, underscores, or hyphens. Bursts and quantu
 are positive integers up to 1,000,000. Task records are limited to 20, including
 finished records until reset. Each payload is 1-65,536 bytes, subject to the total
 65,536-byte budget. Time is measured in virtual ticks. Note text can contain spaces.
-An input line holds at most 2,046 bytes.
+An input line holds at most 2,046 bytes. A longer line, or a line containing a
+NUL byte, is rejected and discarded whole; no part of it runs as a command.
 
 `run` prints its first 200 slices and summarizes the rest. `trace.csv` always
 records every slice.
@@ -303,8 +304,6 @@ out of the submission ZIP.
   placement, fragmentation, or paging.
 - `trace.csv` is unbounded: about 690 MB in the worst case (20 tasks of
   1,000,000 ticks at quantum 1).
-- An input line containing a NUL byte is cut at that byte. If it is also
-  oversized, its tail can run as a separate command.
 - A failed write to standard output is not reflected in the exit status.
 - When the trace cannot be written during a long run, the warning can repeat
   many times.

@@ -3,6 +3,7 @@
 
 SYNTAX_ERROR='ERROR: Invalid command or argument; enter help for syntax and limits.'
 TOO_LONG='ERROR: command too long (maximum 2046 bytes); entire line discarded.'
+NUL_BYTE='ERROR: command contains a NUL byte; entire line discarded.'
 
 # ---- Task capacity ----
 
@@ -168,6 +169,59 @@ test_oversized_line_tail_never_executes() {
     line "$TOO_LONG"
     lacks 'Created P'
     has 'records=0/20'
+}
+
+# NUL bytes go straight from printf into the pipe; no shell variable holds one.
+
+test_nul_at_line_start_rejected() {
+    { printf '\0task create Hidden 1 1\n'; echo tasks; } | batch 0
+    empty "$CASE/err"
+    line "$NUL_BYTE"
+    lacks 'Created P'
+    has 'records=0/20'
+}
+
+test_nul_in_middle_of_command_rejected() {
+    { printf 'note create n hello\0world\n'; echo 'note read n'; } | batch 0
+    empty "$CASE/err"
+    line "$NUL_BYTE"
+    lacks 'OK: note create'
+    same '' "$(ls -A "$DATA/notes")"
+}
+
+test_nul_at_line_end_rejected() {
+    { printf 'task create End 1 1\0\n'; echo tasks; } | batch 0
+    empty "$CASE/err"
+    line "$NUL_BYTE"
+    lacks 'Created P'
+    has 'records=0/20'
+}
+
+test_nul_inside_oversized_line_discarded() {
+    { repeat 1000 a; printf '\0'; repeat 2000 b; printf '\n'; echo tasks; } | batch 0
+    empty "$CASE/err"
+    times 1 '^ERROR:'
+    line "$TOO_LONG"
+    has 'records=0/20'
+}
+
+test_oversized_line_with_early_nul_never_runs_tail() {
+    # 2,047 bytes fill the old fgets buffer exactly, so the old reader ran the tail.
+    { printf '#\0'; repeat 2045 x; printf 'task create Tail 1 1\n'; echo tasks; } | batch 0
+    empty "$CASE/err"
+    line "$TOO_LONG"
+    lacks 'Created P'
+    has 'records=0/20'
+}
+
+test_input_recovers_after_nul_line() {
+    { printf 'tasks\0junk\n'; echo 'task create After 1 1'; echo tasks; } | batch 0
+    empty "$CASE/err"
+    times 1 '^ERROR:'
+    line "$NUL_BYTE"
+    times 1 '^minios> tasks$'
+    line 'Created P1 After: READY, burst=1, payload=1 bytes'
+    has 'records=1/20'
 }
 
 test_crlf_input() {

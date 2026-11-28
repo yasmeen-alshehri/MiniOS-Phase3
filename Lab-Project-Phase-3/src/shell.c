@@ -201,6 +201,34 @@ syntax:
 }
 
 /**
+ * Read one whole input line, byte by byte, up to and excluding its newline.
+ * Unlike fgets + strlen, this never stops at a NUL byte, so the complete line is
+ * always consumed and none of it can be read again as a separate command.
+ * Store at most size - 2 content bytes (2,046, as before) and set *too_long when
+ * more arrive; set *nul when any byte is NUL. Return false at EOF before any byte
+ * or on a read error, where a partial line is not executed.
+ */
+static bool read_line(char *line, size_t size, bool *too_long, bool *nul) {
+    size_t length = 0;
+    int ch;
+    bool any = false;
+    *too_long = *nul = false;
+    while ((ch = getchar()) != EOF) {
+        any = true;
+        if (ch == '\n')
+            break;
+        if (ch == '\0')
+            *nul = true;
+        if (length < size - 2)
+            line[length++] = (char)ch;
+        else
+            *too_long = true;
+    }
+    line[length] = '\0';
+    return any && !ferror(stdin);
+}
+
+/**
  * Read commands until quit, EOF, an input failure, or an invariant failure.
  * Interactive mode prints a prompt; batch mode echoes commands for evidence.
  * Always shut down the successfully initialized app before returning.
@@ -215,21 +243,26 @@ int shell_run(App *app, bool interactive) {
     while (true) {
         size_t length;
         int status;
+        bool too_long, nul;
         if (interactive) {
             fputs("minios> ", stdout);
             fflush(stdout);
         }
-        if (!fgets(line, sizeof line, stdin))
+        if (!read_line(line, sizeof line, &too_long, &nul))
             break;
-        length = strlen(line);
-        /* Drain the WHOLE oversized command, so its tail cannot execute separately. */
-        if (length == sizeof line - 1 && line[length - 1] != '\n') {
-            int ch;
-            while ((ch = getchar()) != '\n' && ch != EOF) { }
+        /* read_line consumed the WHOLE line, so a rejected line's tail cannot execute. */
+        if (too_long) {
             puts("ERROR: command too long (maximum 2046 bytes); entire line discarded.");
             logger_event(app, "ERROR", 0, "oversized command discarded");
             continue;
         }
+        if (nul) {
+            puts("ERROR: command contains a NUL byte; entire line discarded.");
+            logger_event(app, "ERROR", 0, "command with NUL byte discarded");
+            continue;
+        }
+        /* No NUL is present, so strlen measures the whole stored line. */
+        length = strlen(line);
         while (length && (line[length - 1] == '\n' || line[length - 1] == '\r'))
             line[--length] = '\0';
         if (!interactive && length && line[0] != '#')
